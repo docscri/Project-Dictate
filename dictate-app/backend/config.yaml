@@ -1,6 +1,6 @@
 app:
   name: "Dictate API"
-  environment: "development"
+  environment: "production"
 
 cors:
   allowed_origins:
