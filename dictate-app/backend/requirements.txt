@@ -1,0 +1,18 @@
+# Direct dependencies, pinned to the verified backend environment.
+-c constraints.txt
+
+fastapi==0.142.2
+anyio==4.15.1
+uvicorn[standard]==0.54.0
+PyYAML==6.0.3
+python-dotenv==1.2.4
+supabase==2.32.0
+deepgram-sdk==7.12.0
+boto3==1.43.109
+botocore==1.43.109
+google-genai==2.29.0
+httpx==0.28.1
+pydantic==2.13.5
+email-validator==2.3.0
+websockets==15.0.1
+starlette==1.7.0

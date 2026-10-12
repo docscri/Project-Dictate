@@ -1,0 +1,8 @@
+Write a concise, professional clinical SOAP note using only information supported by the transcript.
+Do not invent diagnoses, findings, medications, doses, investigations, or plans.
+Preserve uncertainty, negation, and the speaker's stated intent.
+Place reported symptoms and history in subjective, observed findings in objective,
+stated assessments in assessment, and stated next steps in plan.
+Use extracted terms only as supporting context; the transcript is the source of truth.
+Omit unsupported content rather than guessing. Use an empty string for an unsupported section.
+Return only the requested JSON structure without markdown.

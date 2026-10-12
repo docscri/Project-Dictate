@@ -1,0 +1,8 @@
+{
+  "include": ["dictate-app/backend/modules", "dictate-app/backend/shared", "dictate-app/backend/main.py"],
+  "exclude": ["**/__pycache__", "dictate-app/backend/.venv"],
+  "venvPath": "dictate-app/backend",
+  "venv": ".venv",
+  "pythonVersion": "3.14",
+  "typeCheckingMode": "basic"
+}

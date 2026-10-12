@@ -1,0 +1,206 @@
+.dictation-layout { display: grid; grid-template-columns: var(--dictation-sidebar-width) minmax(var(--dictation-paper-min), 1fr) clamp(var(--dictation-controls-min), var(--dictation-controls-fluid), var(--dictation-controls-max)); gap: var(--space-5); min-height: 100vh; padding: var(--space-5); align-items: start; }
+.dictation-sidebar { display: flex; flex-direction: column; height: calc(100vh - var(--space-40)); min-width: 0; }
+.dictation-wordmark { padding: var(--space-3); font-family: var(--font-serif); font-size: var(--text-24); font-weight: var(--weight-semibold); line-height: var(--line-tight); }
+.new-consultation { width: 100%; margin-top: var(--space-4); border-radius: var(--radius-14); flex-shrink: 0; }
+.consultation-icon { width: var(--text-20); height: var(--text-20); fill: none; stroke: var(--current-color); stroke-width: var(--account-stroke-width); stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.consultation-kicker { margin: var(--space-0); color: var(--muted); font-family: var(--font-mono); font-size: var(--text-12); font-weight: var(--weight-normal); letter-spacing: var(--dictation-sidebar-tracking); line-height: var(--dictation-group-line); }
+.dictation-sidebar__heading { padding-inline: var(--space-10); margin-top: var(--space-5); }
+.consultation-list { flex: 1; min-height: 0; overflow-y: auto; margin-top: var(--space-34); margin-bottom: var(--space-5); scrollbar-width: none; }
+.consultation-list::-webkit-scrollbar { display: none; }
+.consultation-group + .consultation-group { margin-top: var(--space-5); }
+.consultation-group > h2 { margin: var(--space-0) var(--space-10) var(--space-2); }
+.consultation-row { display: grid; align-content: center; gap: var(--focus-width); width: 100%; min-height: var(--dictation-row-height); padding: var(--space-10) var(--space-14); border: var(--border-width) solid var(--transparent); border-radius: var(--radius-14); text-align: left; background: var(--transparent); cursor: pointer; }
+.consultation-row + .consultation-row { margin-top: var(--dictation-row-gap); }
+.consultation-row:hover, .consultation-row--active { background: var(--panel); border-color: var(--line); }
+.consultation-row__top { display: flex; gap: var(--space-2); align-items: center; justify-content: space-between; }
+.consultation-row__name { font-size: var(--text-15); font-weight: var(--weight-semibold); line-height: var(--dictation-name-line); }
+.consultation-row time { flex-shrink: 0; font-family: var(--font-mono); font-size: var(--text-13); color: var(--muted); }
+.consultation-row .status-label { border: 0; padding: var(--space-0); background: var(--transparent); border-radius: 0; font-size: var(--text-13); line-height: var(--dictation-status-line); letter-spacing: normal; }
+.consultation-row .status-label::before { display: none; }
+.consultation-empty { margin: var(--space-0) var(--space-10); color: var(--muted); font-size: var(--text-14); line-height: var(--account-label-line); }
+.dictation-profile { display: flex; align-items: center; gap: var(--space-3); min-height: var(--dictation-profile-height); width: 100%; flex-shrink: 0; margin-top: auto; margin-bottom: var(--space-2); border: var(--border-width) solid var(--line); border-radius: var(--radius-16); padding: var(--space-2) var(--space-10); text-align: left; background: var(--transparent); cursor: pointer; }
+.dictation-profile:hover { background: var(--panel); }
+.dictation-profile__avatar { display: grid; place-items: center; width: var(--dictation-avatar-size); height: var(--dictation-avatar-size); flex: 0 0 auto; border-radius: var(--radius-pill); background: var(--accent); color: var(--ink); font-size: var(--text-14); font-weight: var(--weight-semibold); }
+.dictation-profile__identity { display: grid; min-width: 0; font-size: var(--text-13); font-weight: var(--weight-semibold); line-height: var(--dictation-name-line); overflow-wrap: anywhere; }
+.dictation-profile__identity > span:last-child { font-weight: var(--weight-normal); color: var(--muted); font-size: var(--text-12); }
+.dictation-paper { display: flex; flex-direction: column; min-width: 0; min-height: calc(100vh - var(--space-40)); border-radius: var(--radius-24); padding: var(--space-8) var(--space-12); }
+.dictation-paper__header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: var(--space-4); }
+.dictation-patient { min-width: 0; }
+.dictation-patient h2 { margin: var(--space-0); font-family: var(--font-serif); font-size: var(--text-36); font-weight: var(--weight-semibold); line-height: var(--line-body); overflow-wrap: anywhere; }
+.dictation-patient p { margin: var(--space-0); font-size: var(--text-14); color: var(--ink-muted); }
+.dictation-tabs { width: var(--dictation-tabs-width); max-width: 100%; min-width: 0; flex-shrink: 0; margin-top: var(--space-22); flex-wrap: nowrap; }
+.dictation-tabs .tabs__tab { flex: 1; min-width: 0; padding-inline: var(--space-3); white-space: normal; overflow-wrap: anywhere; }
+.dictation-tabs .tabs__tab:disabled { cursor: not-allowed; }
+.dictation-tabs .tabs__tab:disabled:hover { background: var(--transparent); }
+.dictation-placeholder { margin: auto var(--space-0) var(--space-0); padding-top: var(--space-8); font-family: var(--font-serif); font-size: var(--text-28); font-weight: var(--weight-semibold); line-height: var(--dictation-placeholder-line); color: var(--placeholder); }
+.dictation-controls { width: 100%; border: var(--border-width) solid var(--panel-line); border-radius: var(--radius-24); padding: var(--space-6); background: var(--panel); }
+.dictation-controls__top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.dictation-timer { font-family: var(--font-sans); font-size: var(--text-44); line-height: var(--dictation-timer-line); font-style: normal; font-weight: var(--weight-normal); font-variant-numeric: tabular-nums; }
+.dictation-controls__status { font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--tracking-label); color: var(--muted); }
+.dictation-controls__wave { display: flex; width: 100%; justify-content: space-between; gap: var(--space-0); margin-top: var(--space-8); }
+.dictation-controls__wave .waveform__bar { background: var(--line); }
+.dictation-start { width: 100%; min-width: 0; min-height: var(--dictation-start-height); margin-top: var(--space-6); font-size: var(--text-16); }
+.dictation-start .account-icon { flex-shrink: 0; }
+.patient-popup { position: relative; width: min(100%, var(--patient-popup-width)); padding: var(--space-34) var(--space-40); border: 0; background: var(--paper); color: var(--ink); }
+.patient-popup__close { position: absolute; top: var(--space-5); right: var(--space-22); display: grid; place-items: center; width: var(--control-height-sm); height: var(--control-height-sm); border: var(--border-width) solid var(--field-line); border-radius: var(--radius-pill); background: var(--transparent); color: var(--ink); cursor: pointer; }
+.patient-popup__close:hover { background: var(--hover-paper); }
+.patient-popup__kicker { margin: var(--space-0); color: var(--ink-muted); font-family: var(--font-mono); font-size: var(--text-12); letter-spacing: var(--dictation-sidebar-tracking); line-height: var(--dictation-group-line); }
+.patient-popup__title { margin: var(--space-2) var(--space-0) var(--space-6); font-family: var(--font-serif); font-size: var(--text-34); font-weight: var(--weight-semibold); line-height: var(--patient-popup-title-line); }
+.patient-popup__tabs { display: flex; width: 100%; flex-wrap: nowrap; }
+.patient-popup__tabs .tabs__tab { flex: 1; }
+.patient-popup__error { margin-top: var(--space-4); }
+.patient-search { margin-top: var(--space-22); }
+.patient-search__field { position: relative; }
+.patient-search__field > .consultation-icon { position: absolute; z-index: var(--patient-icon-layer); pointer-events: none; top: 50%; left: var(--patient-search-icon-left); transform: translateY(-50%); color: var(--placeholder); }
+.patient-search__field .input-field { gap: var(--space-0); }
+.patient-search__field label { position: absolute; width: var(--border-width); height: var(--border-width); overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.patient-search__field input { padding-left: var(--patient-search-pad); font-size: var(--text-15); }
+.patient-search__results { display: grid; gap: var(--space-10); max-height: var(--patient-results-height); overflow-y: auto; scrollbar-width: none; margin-top: var(--space-10); }
+.patient-search__results::-webkit-scrollbar { display: none; }
+.patient-result { display: flex; gap: var(--space-4); align-items: center; min-height: var(--patient-result-height); border: var(--border-width) solid var(--divider); border-radius: var(--radius-16); padding: var(--space-10) var(--space-14); background: var(--field); }
+.patient-result--selected { border-color: var(--ink); box-shadow: inset 0 0 0 var(--border-width) var(--ink); }
+.patient-result__initials { display: grid; place-items: center; flex-shrink: 0; width: var(--patient-result-avatar); height: var(--patient-result-avatar); border-radius: var(--soap-letter-radius); background: var(--ink); color: var(--accent); font-family: var(--font-serif); font-size: var(--text-20); font-weight: var(--weight-semibold); }
+.patient-result__identity { display: grid; flex: 1; min-width: 0; }
+.patient-result__name { font-family: var(--font-serif); font-size: var(--text-20); font-weight: var(--weight-semibold); line-height: var(--line-body); overflow-wrap: anywhere; }
+.patient-result__meta { color: var(--ink-muted); font-family: var(--font-mono); font-size: var(--text-12); }
+.patient-result .button { flex-shrink: 0; padding-inline: var(--space-5); font-size: var(--text-14); }
+.patient-result .button--primary { color: var(--accent); }
+.patient-popup .button--outline { color: var(--ink); border-color: var(--field-line); }
+.patient-popup .button--outline:hover { background: var(--hover-paper); }
+.patient-popup__submit { width: 100%; }
+.patient-search > .patient-popup__submit { margin-top: var(--space-22); }
+.patient-add { margin-top: var(--space-6); }
+.patient-add__fields { display: grid; grid-template-columns: var(--patient-name-ratio) 1fr; gap: var(--space-4); }
+.patient-add .input-field { gap: var(--space-2); line-height: var(--account-label-line); }
+.patient-popup .input-field__control { font-weight: var(--weight-normal); }
+.patient-popup input[type="number"] { appearance: textfield; }
+.patient-popup input[type="number"]::-webkit-inner-spin-button, .patient-popup input[type="number"]::-webkit-outer-spin-button { appearance: none; margin: var(--space-0); }
+.patient-add .input-field__control[aria-invalid="true"] { border-color: var(--error-ink); }
+.patient-add__sex { margin: var(--space-4) var(--space-0); padding: var(--space-0); border: 0; min-width: 0; }
+.patient-add__sex legend { padding: var(--space-0); margin-bottom: var(--space-2); font-size: var(--text-14); font-weight: var(--weight-semibold); line-height: var(--account-label-line); }
+.patient-add__sex > div { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.patient-add__sex[aria-invalid="true"] .chip { border-color: var(--error-ink); }
+.patient-add__sex .chip { border-color: var(--field-line); color: var(--ink-muted); padding-inline: var(--space-5); }
+.patient-add__sex .chip--selected { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.patient-add__sex .chip__mark { display: none; }
+.dictation-controls { display: grid; gap: var(--dictation-control-gap); }
+.dictation-timer { font-family: var(--font-mono); font-weight: var(--weight-medium); }
+.dictation-controls__status.status-label { padding: var(--space-0); border: 0; background: var(--transparent); border-radius: 0; font-family: var(--font-sans); font-size: var(--text-12); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-heading); }
+.dictation-controls__status::before { display: none; }
+.dictation-controls__status.status-label--paused, .dictation-controls__status.status-label--processing { color: var(--warn); }
+.dictation-controls__status.status-label--dictating { color: var(--rec); }
+.dictation-controls__status.status-label--signed { color: var(--done); }
+.dictation-controls__status.status-label--ready { color: var(--accent); }
+.dictation-controls__status.status-label--failed { color: var(--danger); }
+.dictation-controls__wave { height: var(--dictation-wave-height); min-height: var(--dictation-wave-height); margin: var(--space-0); }
+.dictation-controls__wave.waveform--active .waveform__bar { background: var(--rec); }
+.dictation-controls--reconnecting .dictation-controls__wave .waveform__bar { background: var(--rec); }
+.dictation-start { margin-top: var(--space-0); font-weight: var(--weight-semibold); }
+.dictation-action-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dictation-action { display: grid; grid-template-rows: var(--dictation-round-main) var(--dictation-caption-height); gap: var(--space-2); justify-items: center; min-width: 0; text-align: center; }
+.dictation-action > span { max-width: var(--dictation-caption-width); font-size: var(--text-13); font-weight: var(--weight-medium); line-height: var(--dictation-status-line); }
+.dictation-action--delete > span { color: var(--muted); }
+.dictation-action--stop > span { color: var(--rec); }
+.dictation-round { padding: var(--space-0); align-self: end; width: var(--dictation-round-size); height: var(--dictation-round-size); min-height: var(--dictation-round-size); border-radius: var(--radius-pill); }
+.dictation-round--main { width: var(--dictation-round-main); height: var(--dictation-round-main); min-height: var(--dictation-round-main); }
+.dictation-round--pause { background: var(--control); border-color: var(--line-strong); }
+.dictation-round--small.button--outline { border-color: var(--line); color: var(--muted); }
+.dictation-round--stop { background: var(--rec); color: var(--ink); }
+.dictation-round--stop:hover:not(:disabled) { background: var(--rec); }
+.dictation-control-icon { width: var(--dictation-icon-main); height: var(--dictation-icon-main); fill: var(--current-color); }
+.dictation-control-icon--trash { width: var(--dictation-icon-small); height: var(--dictation-icon-small); fill: none; stroke: var(--current-color); stroke-width: var(--account-stroke-width); stroke-linecap: round; stroke-linejoin: round; }
+.dictation-control-icon--stop { width: var(--dictation-icon-small); height: var(--dictation-icon-small); }
+.dictation-delete-confirm { display: flex; align-items: center; gap: var(--space-2); padding-block: var(--dictation-confirm-pad); }
+.dictation-delete-confirm p { flex: 1; min-width: 0; margin: var(--space-0); font-size: var(--text-14); line-height: var(--dictation-status-line); }
+.dictation-delete-confirm .button { padding-inline: var(--space-4); border-color: var(--line); font-weight: var(--weight-medium); font-size: var(--text-14); }
+.dictation-delete-confirm .dictation-delete-confirm__delete { border-color: var(--rec); color: var(--rec); }
+.dictation-control-error { margin: var(--space-0); color: var(--fail-text); font-size: var(--text-14); }
+.dictation-paper { height: calc(100svh - var(--space-40)); }
+.live-transcript { flex: 1; min-height: var(--transcript-view-min); overflow-y: auto; margin-top: var(--space-6); display: flex; flex-direction: column; scrollbar-width: thin; }
+.live-transcript p { margin: auto var(--space-0) var(--space-0); font-family: var(--font-serif); font-size: var(--text-32); font-weight: var(--weight-normal); line-height: var(--line-body); overflow-wrap: anywhere; white-space: pre-wrap; }
+.live-transcript__interim { opacity: var(--transcript-interim-opacity); }
+.live-transcript__cursor { display: inline-block; width: var(--transcript-cursor-width); height: var(--transcript-cursor-height); margin-inline-start: var(--space-2); vertical-align: var(--transcript-cursor-offset); background: var(--rec); animation: transcript-cursor var(--transcript-cursor-blink) step-end infinite; }
+@keyframes transcript-cursor { 50% { opacity: 0; } }
+.live-reconnecting, .live-error { margin-top: var(--space-6); flex-shrink: 0; }
+.live-reconnecting { align-items: center; }
+.live-reconnecting > div { display: flex; align-items: center; gap: var(--space-4); width: 100%; }
+.live-reconnecting > div > span { flex: 1; }
+.live-reconnecting .button { flex-shrink: 0; }
+.live-mic-off { margin-top: auto; padding-top: var(--space-6); }
+.live-mic-off__icon { display: grid; place-items: center; width: var(--mic-off-icon-size); height: var(--mic-off-icon-size); border-radius: var(--radius-16); background: var(--error-bg); color: var(--error-ink); }
+.live-mic-off h2 { font-family: var(--font-serif); font-size: var(--text-32); margin: var(--space-5) var(--space-0); }
+.live-mic-off p { color: var(--ink-muted); font-size: var(--text-16); line-height: var(--line-body); margin: var(--space-0); white-space: pre-line; }
+.dictation-controls--micOff .dictation-controls__wave { height: var(--dictation-wave-height); }
+@media (prefers-reduced-motion: reduce) {
+  .dictation-controls__wave .waveform__bar, .live-transcript__cursor { animation: none !important; }
+  .live-transcript__cursor { opacity: 1; }
+}
+.dictation-compact-header, .dictation-drawer-close, .dictation-dock-handle, .dictation-dock-new { display: none; }
+.dictation-dock, .dictation-dock-content { display: contents; }
+.dictation-list-slot { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+.dictation-view-panel:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.consultation-list-sentinel { height: var(--space-1); }
+@media (max-width: 1220px) {
+  .dictation-layout { height: 100svh; min-height: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3); padding-bottom: calc(var(--dictation-dock-peek) + env(safe-area-inset-bottom) + var(--space-3)); overflow: hidden; }
+  .dictation-compact-header { display: flex; align-items: center; gap: var(--space-3); min-height: var(--control-height-sm); }
+  .dictation-compact-header .dictation-wordmark { flex: 1; padding: var(--space-0); }
+  .dictation-drawer-trigger, .dictation-compact-profile, .dictation-drawer-close { display: grid; place-items: center; width: var(--control-height-sm); height: var(--control-height-sm); padding: var(--space-0); border: 0; border-radius: var(--radius-pill); background: var(--transparent); color: var(--text); cursor: pointer; }
+  .dictation-drawer-trigger svg { width: var(--text-24); height: var(--text-24); fill: none; stroke: var(--current-color); stroke-width: var(--account-stroke-width); stroke-linecap: round; }
+  .dictation-drawer-close { position: absolute; top: var(--space-4); right: var(--space-4); font-size: var(--text-28); }
+  .dictation-drawer-backdrop { position: fixed; inset: 0; z-index: var(--dictation-drawer-backdrop-layer); background: var(--overlay); }
+  .dictation-sidebar { position: fixed; inset: 0 auto 0 0; z-index: var(--dictation-drawer-layer); display: flex; width: min(var(--dictation-drawer-width), var(--dictation-drawer-max-width)); height: 100svh; padding: var(--space-6); background: var(--ground); visibility: hidden; transform: translateX(-100%); transition: transform var(--motion-base) var(--ease-out), visibility var(--motion-base); }
+  .dictation-sidebar--open { visibility: visible; transform: translateX(0); }
+  .dictation-sidebar .dictation-wordmark { padding: var(--space-0); }
+  .dictation-sidebar .new-consultation { display: none; }
+  .dictation-sidebar__heading { margin-top: var(--space-8); padding: var(--space-0); }
+  .consultation-list { margin-top: var(--space-6); max-height: none; }
+  .consultation-group > h2 { margin-inline: var(--space-0); }
+  .dictation-profile { width: 100%; min-height: var(--dictation-profile-height); margin: var(--space-0); }
+  .dictation-paper { grid-column: 1; grid-row: 2; width: 100%; height: 100%; min-height: 0; padding: var(--space-6); overflow: auto; }
+  .dictation-paper__header { flex-wrap: wrap; }
+  .dictation-tabs { margin-top: var(--space-0); }
+  .dictation-patient h2 { font-size: var(--text-28); }
+  .dictation-placeholder { font-size: var(--text-24); padding-top: var(--space-4); }
+  .live-transcript { min-height: 0; flex-shrink: 1; }
+  .live-transcript p { font-size: var(--text-26); }
+  .live-reconnecting > div { flex-wrap: wrap; }
+  .live-mic-off h2 { font-size: var(--text-26); }
+  .dictation-dock { position: fixed; inset: auto 0 0; z-index: var(--dictation-dock-layer); display: block; max-height: var(--dictation-dock-max-height); overflow-y: auto; padding: var(--space-0) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom)); border: var(--border-width) solid var(--panel-line); border-radius: var(--radius-24) var(--radius-24) 0 0; background: var(--panel); box-shadow: var(--dictation-dock-shadow); }
+  .dictation-dock-handle { display: flex; align-items: center; justify-content: center; width: 100%; min-height: var(--space-8); border: 0; padding: var(--space-0); border-radius: var(--radius-pill); background: var(--transparent); cursor: pointer; touch-action: none; }
+  .dictation-dock-handle span { width: var(--dictation-dock-handle-width); height: var(--dictation-dock-handle-height); border-radius: var(--radius-pill); background: var(--muted); }
+  .dictation-dock-content { display: grid; gap: var(--space-4); }
+  .dictation-controls { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: var(--space-4); border: 0; border-radius: 0; padding: var(--space-0); }
+  .dictation-controls__top { flex-wrap: wrap; align-items: center; }
+  .dictation-timer { font-size: var(--dictation-compact-timer-size); line-height: var(--dictation-compact-line); }
+  .dictation-controls__wave { height: var(--dictation-wave-height); min-height: var(--dictation-wave-height); }
+  .dictation-start { min-height: var(--control-height-lg); margin: var(--space-0); padding-inline: var(--space-4); }
+  .dictation-dock--open .dictation-dock-new { display: inline-flex; width: 100%; }
+  .dictation-dock--open { animation: dictation-dock-rise var(--motion-base) var(--ease-out); }
+  .dictation-dock:not(.dictation-dock--open) .dictation-controls__wave,
+  .dictation-dock:not(.dictation-dock--open) .dictation-controls--ready .dictation-controls__top,
+  .dictation-dock:not(.dictation-dock--open) .dictation-controls--micOff .dictation-controls__top { display: none; }
+  .dictation-dock--active:not(.dictation-dock--open):not(.dictation-dock--confirm) .dictation-controls { grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; }
+  .dictation-dock--active:not(.dictation-dock--open):not(.dictation-dock--confirm) .dictation-controls__top { flex-direction: column; align-items: start; gap: var(--space-0); }
+  .dictation-dock--active:not(.dictation-dock--open) .dictation-action-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+  .dictation-dock--active:not(.dictation-dock--open) .dictation-action--delete { display: none; }
+  .dictation-dock--active:not(.dictation-dock--open) .dictation-action { grid-template-rows: auto; gap: var(--space-0); }
+  .dictation-dock--active:not(.dictation-dock--open) .dictation-action > span { display: none; }
+  .dictation-dock--active:not(.dictation-dock--open) .dictation-round { width: var(--control-height-sm); height: var(--control-height-sm); min-height: var(--control-height-sm); }
+  .dictation-delete-confirm { flex-wrap: wrap; padding: var(--space-0); }
+}
+@keyframes dictation-dock-rise { from { transform: translateY(var(--space-6)); } to { transform: translateY(0); } }
+@media (max-width: 760px) {
+  .dictation-paper { padding: var(--space-5); }
+  .modal-backdrop { padding: var(--space-4); }
+  .patient-popup { padding: var(--space-8) var(--space-5); }
+  .patient-popup__title { font-size: var(--text-28); }
+  .patient-popup__close { top: var(--space-3); right: var(--space-3); }
+  .patient-popup__tabs .tabs__tab { padding-inline: var(--space-2); font-size: var(--text-12); }
+  .patient-result { gap: var(--space-2); padding-inline: var(--space-10); }
+  .patient-result__name { font-size: var(--text-16); }
+  .patient-result .button { padding-inline: var(--space-3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dictation-sidebar { transition: none; }
+  .dictation-dock--open { animation: none; }
+}

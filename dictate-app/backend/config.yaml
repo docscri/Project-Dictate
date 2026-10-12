@@ -1,0 +1,32 @@
+app:
+  name: "Dictate API"
+  environment: "development"
+
+cors:
+  allowed_origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+auth:
+  provider: "supabase"
+
+database:
+  provider: "supabase"
+
+note:
+  default_format: "default"
+
+ai:
+  transcription: "deepgram"
+  transcription_model: "nova-3"
+  transcription_language: "en"
+  # Browser audio: raw 16-bit signed little-endian PCM, 16 kHz, mono.
+  transcription_encoding: "linear16"
+  transcription_sample_rate: 16000
+  transcription_channels: 1
+  transcription_close_timeout: 10
+  # Set true to extract terms with AWS; false generates notes from the transcript alone.
+  ner_enabled: false
+  ner: "aws_comprehend_medical"
+  llm: "gemini_2_5_flash"
+  llm_model: "gemma-4-26b-a4b-it"
