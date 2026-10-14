@@ -17,6 +17,8 @@ export default function useConsultations() {
   const select = useCallback(async (id) => {
     const version = ++selection.current;
     const current = capture();
+    const summary = getState().consultations.find(item => item.id === id);
+    if (summary) setState({ selectedConsultation: summary, selectedPatient: summary.patient ?? null });
     setError(null);
     failedSelection.current = null;
     try {
@@ -51,7 +53,7 @@ export default function useConsultations() {
       page.offset += items.length; page.hasMore = items.length === pageSize;
       if (firstPage && !getState().selectedConsultation && selection.current === selectionAtStart) {
         // Restore an older selection directly; it need not be on the first page.
-        const target = rememberedConsultationId() ?? items[0]?.id;
+        const target = rememberedConsultationId();
         if (target) await select(target);
       }
     } catch (failure) {

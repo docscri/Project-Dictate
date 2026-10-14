@@ -6,15 +6,19 @@ export default function usePatientSearch(query, active = true) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
-    if (!active) return;
+    const normalized = query.trim();
+    if (!active || !normalized) {
+      setLoading(false); setError(null); setResults([]);
+      return;
+    }
     let current = true;
     const controller = new AbortController();
-    setLoading(true); setError(null); setResults([]);
+    setLoading(true); setError(null);
     const timer = setTimeout(() => {
-      searchPatients(query, { signal: controller.signal }).then((items) => { if (current) setResults(items); })
+      searchPatients(normalized, { signal: controller.signal }).then((items) => { if (current) setResults(items); })
         .catch((failure) => { if (current && failure.code !== 'request_cancelled') setError(failure.code ?? 'server_error'); })
         .finally(() => { if (current) setLoading(false); });
-    }, 250);
+    }, 150);
     return () => { current = false; clearTimeout(timer); controller.abort(); };
   }, [query, active]);
   return { results, error, loading };

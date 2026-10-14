@@ -15,6 +15,8 @@ database:
 
 note:
   default_format: "default"
+  # Abandoned note processing becomes retryable after 15 minutes.
+  processing_timeout_seconds: 900
 
 ai:
   transcription: "deepgram"

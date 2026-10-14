@@ -1,9 +1,9 @@
 # modules/profile/routes.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from modules.profile.schemas import ProfileUpdateRequest
-from modules.profile.service import get_profile, update_profile
+from modules.profile.service import ensure_profile, update_profile
 from shared.security import get_current_user
 
 
@@ -17,15 +17,7 @@ router = APIRouter(
 def read_profile(
     user=Depends(get_current_user),
 ):
-    profile = get_profile(user.id)
-
-    if profile is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Profile not found",
-        )
-
-    return profile
+    return ensure_profile(user)
 
 
 @router.put("")
@@ -34,6 +26,6 @@ def edit_profile(
     user=Depends(get_current_user),
 ):
     return update_profile(
-        user.id,
+        user,
         data.model_dump(exclude_none=True),
     )

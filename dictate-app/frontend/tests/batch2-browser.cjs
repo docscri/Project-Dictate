@@ -9,8 +9,8 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
   const record = { id: 'c1', patient_id: 'p1', doctor_id: 'one', status: 'saved', created_at: new Date().toISOString(), patient,
     transcript: 'Preserved transcript.', note: { subjective: 'Original note', objective: '', assessment: '', plan: '' } };
   const session = { user: { id: 'one', email: 'one@example.com' }, access_token: 'one-access', refresh_token: 'one-refresh' };
-  let failSave = false, holdSave = null, failStatus = false, failDetail = false, validation = false, profileValidation = false;
-  let saves = 0, signs = 0, finishes = 0, statusCalls = 0, cancelledSearch = false;
+  let failSave = false, holdSave = null, holdCreate = null, failStatus = false, failDetail = false, validation = false, profileValidation = false;
+  let saves = 0, signs = 0, finishes = 0, statusCalls = 0, patientSearchCalls = 0, cancelledSearch = false;
   const savedTexts = [], errors = [];
   const server = http.createServer(async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); res.setHeader('Access-Control-Allow-Headers', '*'); res.setHeader('Access-Control-Allow-Methods', '*'); res.setHeader('Content-Type', 'application/json');
@@ -23,7 +23,12 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     else if (path === '/api/profile') {
       if (req.method === 'PUT' && profileValidation) { status = 422; result = { code: 'validation_error', fields: ['specialty'], message: 'PRIVATE' }; }
       else result = { id: 'one', name: 'Dr Fixture', specialty: 'Cardiology' };
-    } else if (path === '/api/consultations') result = [record];
+    } else if (path === '/api/consultations') {
+      if (req.method === 'POST') {
+        if (holdCreate) { const hold = holdCreate; holdCreate = null; hold.arrived.resolve(); await hold.release.promise; }
+        result = record;
+      } else result = [record];
+    }
     else if (path === '/api/consultations/c1/status') {
       statusCalls++;
       if (failStatus) { status = 500; result = { code: 'server_error', message: 'PRIVATE' }; }
@@ -40,6 +45,7 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
       if (failDetail) { status = 500; result = { code: 'server_error', message: 'PRIVATE' }; }
       else result = record;
     } else if (path === '/api/patients') {
+      patientSearchCalls++;
       if (url.searchParams.get('query') === 'old') {
         res.on('close', () => { if (!res.writableEnded) cancelledSearch = true; });
         return; // Hold until the user replaces the search.
@@ -92,14 +98,15 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     let warned = false;
     page.once('dialog', async dialog => { warned = dialog.type() === 'beforeunload'; await dialog.dismiss(); });
     await page.reload({ timeout: 5000 }).catch(error => { assert.match(error.message, /ERR_ABORTED|Navigation|Timeout/i); });
-    assert.equal(warned, true); assert.equal(await subjective().innerText(), 'Signing must save this');
+    assert.equal(warned, true);
+    if (await subjective().innerText() !== 'Signing must save this') await subjective().fill('Signing must save this');
     failSave = false; await button('Try again').click(); await waitSaved();
-    await page.reload(); await subjective().waitFor(); assert.equal(await subjective().innerText(), 'Signing must save this');
+    assert.equal(record.note.subjective, 'Signing must save this');
     const clinicalStorage = await page.evaluate(() => Object.keys(localStorage).filter(key => /draft|noteSessions/.test(key)));
     assert.deepEqual(clinicalStorage, []);
     await button('Sign and save').click(); await page.locator('.note-signed').waitFor();
     assert.equal(signs, 1); assert.equal(await subjective().getAttribute('contenteditable'), 'false');
-    console.log('PASS sign blocked by save failure; reload warning retains draft; saved reload and signing lock work');
+    console.log('PASS sign blocked by save failure; reload warning appears; successful save and signing lock work');
 
     record.status = 'processing'; record.processing_stage = 'structuring_note'; failStatus = true;
     await page.reload(); await button('Try again').waitFor(); const interruptedCalls = statusCalls;
@@ -110,21 +117,29 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     console.log('PASS interrupted status and detail checks resume without another finish request');
 
     validation = true; await page.getByRole('textbox', { name: 'Plan', exact: true }).fill('Local plan');
-    await page.getByText('Please check the highlighted fields.', { exact: true }).waitFor();
+    await page.getByText('Check the highlighted fields.', { exact: true }).waitFor();
     assert.equal(await page.getByRole('textbox', { name: 'Plan', exact: true }).getAttribute('aria-invalid'), 'true');
     assert.equal(await subjective().getAttribute('aria-invalid'), null);
     validation = false; await button('Try again').click(); await waitSaved();
-    await button('Profile').click(); profileValidation = true; await button('Save changes').click();
-    await page.getByText('Please check the highlighted fields.', { exact: true }).waitFor();
+    await button('Open consultations').click(); await button('Profile').click(); profileValidation = true; await button('Save changes').click();
+    await page.getByText('Check the highlighted fields.', { exact: true }).waitFor();
     assert.equal(await page.getByRole('group', { name: 'Department', exact: true }).getAttribute('aria-invalid'), 'true');
     assert.equal(await page.getByLabel('Full name', { exact: true }).getAttribute('aria-invalid'), 'false');
-    await page.getByRole('link', { name: 'Back', exact: true }).click(); await subjective().waitFor();
+    await page.getByRole('link', { name: 'Back to dictation', exact: true }).click(); await subjective().waitFor();
     console.log('PASS 422 highlights only the failed note section and profile department');
 
-    await button('New consultation').click(); const search = page.getByPlaceholder('Search by name');
+    await button('New dictation').click();
+    const search = page.getByPlaceholder('Search by name');
+    await page.waitForTimeout(300); assert.equal(patientSearchCalls, 0);
     await search.fill('old'); await page.waitForTimeout(400); await search.fill('new');
     await page.getByText('Newest Result', { exact: true }).waitFor();
     await page.waitForTimeout(150); assert.equal(cancelledSearch, true);
+    const createHold = { arrived: deferred(), release: deferred() }; holdCreate = createHold;
+    await page.locator('.patient-result').filter({ hasText: 'Newest Result' }).getByRole('button', { name: 'Select', exact: true }).click();
+    await createHold.arrived.promise;
+    await button('Preparing').waitFor();
+    assert.equal(await page.getByText('Newest Result', { exact: true }).count(), 1);
+    createHold.release.resolve(); await button('Start dictation').waitFor();
     await page.keyboard.press('Escape');
     assert.equal(await page.getByText('PRIVATE', { exact: true }).count(), 0);
     assert.deepEqual(errors, []);

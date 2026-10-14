@@ -1,56 +1,59 @@
-@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/sans.ttf') format('truetype'); }
-@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/sans-medium.ttf') format('truetype'); }
-@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/sans-semibold.ttf') format('truetype'); }
-@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/sans-bold.ttf') format('truetype'); }
-@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/serif-variable.ttf') format('truetype'); }
-@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/serif.ttf') format('truetype'); }
-@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 700; font-display: swap; src: url('/fonts/serif-bold.ttf') format('truetype'); }
-@font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/mono.ttf') format('truetype'); }
-@font-face { font-family: 'DM Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/mono-medium.ttf') format('truetype'); }
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
   --ground: #0B1411;
-  --panel: #14211C;
-  --panel-line: #1E2F27;
-  --line: #2A3D35;
-  --line-strong: #3B554A;
-  --control: #1E3028;
+  --panel: var(--ground);
+  --panel-line: color-mix(in srgb, var(--paper) 14%, transparent);
+  --line: color-mix(in srgb, var(--paper) 20%, transparent);
+  --line-strong: color-mix(in srgb, var(--paper) 32%, transparent);
+  --control: color-mix(in srgb, var(--paper) 8%, var(--ground));
   --text: #E8F1EC;
-  --muted: #8FA79C;
+  --muted: color-mix(in srgb, var(--paper) 60%, transparent);
   --paper: #E8F1EC;
   --ink: #0B1411;
-  --ink-muted: #3E5A4E;
-  --paper-chip: #D2E0D8;
-  --field: #F5FAF7;
-  --field-line: #9DB5A9;
-  --divider: #C7D8CE;
-  --hover-paper: #DCE8E1;
+  --ink-muted: color-mix(in srgb, var(--ink) 65%, transparent);
+  --paper-chip: var(--paper);
+  --field: var(--paper);
+  --field-line: var(--ink);
+  --divider: color-mix(in srgb, var(--ink) 18%, var(--paper));
+  --hover-paper: color-mix(in srgb, var(--ink) 8%, var(--paper));
   --accent: #B6F36B;
   --accent-ink: #2F6B1E;
-  --done: #8FD16A;
+  --done: var(--accent-ink);
   --rec: #FF7A59;
   --warn: #FFB04D;
-  --danger: #FF6B6B;
-  --newword: #FFD9CE;
-  --placeholder: #526F61;
-  --skeleton: #B9CCC1;
-  --error-bg: #FFE3DC;
-  --error-ink: #B63A09;
-  --offline-bg: #FFF1DA;
-  --offline-line: #E8C27A;
-  --offline-text: #3D2E0A;
-  --offline-icon: #B45309;
-  --review-bg: #1F1A10;
-  --review-line: #5A4A2A;
-  --fail-text: #FF9C85;
-  --signed-line: #2F4A3A;
-  --overlay: rgba(5, 10, 8, 0.68);
+  --danger: var(--rec);
+  --newword: color-mix(in srgb, var(--rec) 24%, var(--paper));
+  --placeholder: color-mix(in srgb, var(--ink) 65%, transparent);
+  --skeleton: color-mix(in srgb, var(--ink) 18%, var(--paper));
+  --error-bg: color-mix(in srgb, var(--rec) 16%, var(--paper));
+  --error-ink: color-mix(in srgb, var(--rec) 60%, var(--ground) 40%);
+  --offline-bg: color-mix(in srgb, var(--warn) 18%, var(--paper));
+  --offline-line: color-mix(in srgb, var(--warn) 62%, var(--paper));
+  --offline-text: var(--ink);
+  --offline-icon: color-mix(in srgb, var(--warn) 70%, var(--ground));
+  --review-bg: color-mix(in srgb, var(--warn) 10%, var(--ground));
+  --review-line: color-mix(in srgb, var(--warn) 34%, var(--ground));
+  --fail-text: var(--rec);
+  --signed-line: color-mix(in srgb, var(--accent-ink) 52%, var(--paper));
+  --overlay: color-mix(in srgb, var(--ground) 68%, transparent);
   --transparent: transparent;
   --current-color: currentColor;
 
-  --font-serif: Fraunces, Georgia, serif;
-  --font-sans: "DM Sans", system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, monospace;
+  --font-serif: "Manrope", system-ui, sans-serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-mono: "Manrope", system-ui, sans-serif;
+  --account-font: "Manrope", system-ui, sans-serif;
+
+  --account-forest: var(--ground);
+  --account-mint: var(--paper);
+  --account-lime: var(--accent);
+  --account-coral: var(--rec);
+  --account-deep-coral: color-mix(in srgb, var(--rec) 60%, var(--ground) 40%);
+  --account-secondary-dark: color-mix(in srgb, var(--paper) 60%, transparent);
+  --account-secondary-mint: color-mix(in srgb, var(--ground) 65%, transparent);
+  --account-error-surface: color-mix(in srgb, var(--rec) 16%, transparent);
+  --account-skeleton: color-mix(in srgb, var(--ground) 14%, transparent);
 
   --text-12: 12px;
   --text-13: 13px;
@@ -117,6 +120,12 @@
   --wave-active-scale-max: 1.3;
   --banner-pad: var(--space-4);
   --banner-icon-size: var(--text-20);
+  --error-banner-font-size: clamp(12px, 1.8vw, 14px);
+  --error-banner-icon-size: clamp(18px, 2.4vw, 20px);
+  --error-banner-gap: clamp(8px, 1.8vw, 12px);
+  --error-banner-pad-block: clamp(10px, 1.8vw, 14px);
+  --error-banner-pad-inline: clamp(12px, 2.4vw, 16px);
+  --error-banner-min-height: 44px;
   --modal-width: 480px;
   --modal-pad: var(--space-8);
   --modal-layer: 1000;
@@ -130,17 +139,17 @@
   --demo-page-pad: var(--space-8);
   --demo-section-gap: var(--space-12);
   --demo-item-gap: var(--space-3);
-  --demo-focus-ring: var(--accent);
-  --tracking-label: 0.06em;
+  --demo-focus-ring: var(--paper);
+  --tracking-label: 0.08em;
   --tracking-heading: 0.08em;
   --disabled-opacity: 0.52;
   --disabled-field-opacity: 0.55;
   --weight-medium: 500;
   --weight-normal: 400;
   --weight-semibold: 600;
-  --weight-control: 650;
+  --weight-control: 600;
   --weight-bold: 700;
-  --weight-status: 750;
+  --weight-status: 600;
   --line-body: 1.5;
   --line-tight: 1;
   --button-hover-offset: -1px;
@@ -149,10 +158,11 @@
   --note-line-height: 1.55;
   --note-primary-height: 60px;
   --note-progress-height: 6px;
+  --note-progress-track-max: 360px;
   --note-blur: 2px;
-  --note-stage-rise: -24px;
+  --note-stage-rise: -8px;
   --note-stage-line-height: 1.2;
-  --note-stage-space: 100px;
+  --note-stage-space: var(--space-6);
   --space-10: 10px;
   --space-14: 14px;
   --space-22: 22px;
@@ -169,7 +179,7 @@
   --dictation-placeholder-line: 48px;
   --dictation-timer-line: 54px;
   --dictation-start-height: 64px;
-  --dictation-sidebar-tracking: .14em;
+  --dictation-sidebar-tracking: .08em;
   --dictation-group-line: 14px;
   --dictation-row-height: 66px;
   --dictation-name-line: 22px;
@@ -190,13 +200,25 @@
   --patient-icon-layer: 1;
   --account-pad: 40px;
   --account-brand-top: 40px;
-  --account-brand-size: var(--text-26);
-  --account-title-size: var(--text-38);
+  --account-brand-size: var(--text-24);
+  --account-title-size: var(--text-32);
   --account-title-line: 1.1;
   --account-label-line: 20px;
   --account-eyebrow-line: 14px;
   --account-banner-pad-block: 10px;
   --account-field-size: var(--text-16);
+  --account-button-size: var(--text-15);
+  --account-small-size: var(--text-12);
+  --account-preview-heading-size: var(--text-26);
+  --account-field-outline: 1.5px;
+  --account-error-outline: 2px;
+  --account-action-size: 44px;
+  --account-back-size: 44px;
+  --account-back-visual-size: 38px;
+  --account-compact-form-width: 296px;
+  --account-compact-preview-width: 344px;
+  --account-compact-control-height: 44px;
+  --account-compact-avatar-size: 52px;
   --account-field-radius: var(--radius-14);
   --account-icon-size: 24px;
   --account-stroke-width: 2px;
@@ -224,7 +246,7 @@
   --dictation-drawer-width: 320px;
   --dictation-drawer-max-width: 86vw;
   --dictation-dock-max-height: 80svh;
-  --dictation-dock-shadow: 0 -8px 32px rgba(0, 0, 0, 0.22);
+  --dictation-dock-shadow: 0 -8px 32px color-mix(in srgb, var(--ground) 22%, transparent);
   --dictation-dock-handle-width: 40px;
   --dictation-dock-handle-height: 4px;
   --dictation-control-gap: 18px;
@@ -250,11 +272,26 @@
   --login-wave-scale: 3;
   --login-wave-min-scale: 0.45;
   --login-wave-max-scale: 0.85;
+  --login-brand-top: 40px;
+  --login-brand-inline: 40px;
+  --login-form-width: 380px;
+  --login-field-height: 56px;
+  --login-field-gap: 10px;
+  --login-field-pad: 24px;
+  --login-submit-size: 48px;
+  --login-submit-inset: 4px;
+  --login-mic-gap: 32px;
+  --login-stage-inline: 24px;
+  --login-stage-offset: 2vh;
+  --login-notice-gap: 12px;
+  --login-footer-gap: 24px;
+  --login-wave-inline: 24px;
+  --login-wave-top: 54%;
   --signup-left-width: 51.4%;
   --signup-pad: 56px;
   --signup-chip-width: 540px;
   --signup-back-offset: var(--space-6);
-  --account-eyebrow-tracking: 0.13em;
+  --account-eyebrow-tracking: 0.08em;
   --department-chip-pad: 18px;
   --soap-preview-pad: var(--space-8);
   --soap-preview-radius: 28px;
@@ -340,4 +377,145 @@
   --wave-delay-26: 1000ms;
   --wave-delay-27: 1040ms;
   --wave-delay-28: 1080ms;
+
+  /* Dictation layout: tablet defaults, overridden only at the requested widths. */
+  --topbar-h: 78px;
+  --topbar-pad-block: 20px;
+  --topbar-pad-inline: 16px;
+  --topbar-gap: 12px;
+  --topbar-button-size: var(--tab-h);
+  --topbar-hit-size: 44px;
+  --topbar-icon-size: 20px;
+  --tab-width: 258px;
+  --tab-h: 43px;
+  --tab-inner-pad: 4px;
+  --tab-pad-inline: 4px;
+  --tab-font-size: var(--text-15);
+  --content-pad-inline: 24px;
+  --content-pad-extra-top: 16px;
+  --content-max-width: 760px;
+  --dock-h: 56px;
+  --dock-bottom-gap: 24px;
+  --dock-inline-gap: 16px;
+  --dock-max-width: 440px;
+  --dock-pad-inline: 16px;
+  --dock-control-gap: 10px;
+  --mic-size: 72px;
+  --mic-glow-spread: 8px;
+  --mic-glow-blur: 18px;
+  --mic-glow-duration: 2400ms;
+  --dock-action-size: 40px;
+  --dock-delete-size: 44px;
+  --dock-timer-size: 14px;
+  --dock-wave-gap: 4px;
+  --dock-wave-height: 26px;
+  --dock-button-pad-inline: clamp(10px, 2.2vw, 14px);
+  --dock-compact-action-height: clamp(34px, 6vw, 40px);
+  --dock-confirm-message-inset: 12px;
+  --drawer-pad: 20px;
+  --sidebar-content-inset: var(--space-10);
+  --popup-pad: 32px;
+  --popup-title-size: var(--text-32);
+  --popup-title-mic-size: 40px;
+  --patient-popup-tab-font-size: var(--text-14);
+  --profile-mobile-heading-size: var(--text-28);
+  --profile-mobile-identity-margin: var(--space-6);
+  --note-badge-size: 44px;
+  --note-section-gap: 20px;
+  --note-stage-size: clamp(18px, 3vw, 28px);
+  --note-previous-size: clamp(13px, 2vw, 18px);
+  --transcript-text-size: clamp(18px, 3.2vw, 28px);
+  --note-body-text-size: clamp(15px, 2.2vw, 20px);
+  --note-footer-font: clamp(11px, 2.2vw, 14px);
+  --note-footer-gap: 12px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --topbar-pad-inline: 20px;
+    --content-pad-inline: 28px;
+    --content-pad-extra-top: 0px;
+    --dock-bottom-gap: 32px;
+    --dock-max-width: 500px;
+    --dock-pad-inline: 18px;
+    --dock-control-gap: 12px;
+    --drawer-pad: 24px;
+    --popup-pad: 40px;
+    --popup-title-size: var(--text-32);
+  }
+}
+
+@media (max-width: 599px) {
+  :root {
+    --content-pad-inline: 20px;
+    --dock-h: 52px;
+    --dock-bottom-gap: 16px;
+    --dock-max-width: 340px;
+    --dock-pad-inline: 12px;
+    --dock-control-gap: 8px;
+    --mic-size: 64px;
+    --mic-glow-spread: 6px;
+    --mic-glow-blur: 14px;
+    --dock-action-size: 38px;
+    --dock-timer-size: 13px;
+    --dock-wave-gap: 3px;
+    --dock-wave-height: 22px;
+    --dock-confirm-message-inset: 8px;
+    --note-progress-track-max: 240px;
+    --drawer-pad: 16px;
+    --popup-pad: 20px;
+    --popup-title-size: clamp(22px, 7vw, 26px);
+    --popup-title-mic-size: 36px;
+    --patient-popup-tab-font-size: clamp(11px, 3.3vw, 13px);
+    --profile-mobile-heading-size: var(--text-28);
+    --profile-mobile-identity-margin: var(--space-5);
+    --note-badge-size: 40px;
+    --note-section-gap: 12px;
+    --note-footer-gap: 6px;
+    --account-brand-size: var(--text-24);
+    --account-mic-size: 52px;
+    --login-brand-top: 24px;
+    --login-brand-inline: 20px;
+    --login-form-width: 100%;
+    --login-field-height: 52px;
+    --login-field-gap: 8px;
+    --login-field-pad: 18px;
+    --login-submit-size: 44px;
+    --login-mic-gap: 24px;
+    --login-stage-inline: 20px;
+    --login-stage-offset: 1vh;
+    --login-footer-gap: 20px;
+    --login-wave-height: 128px;
+    --login-wave-width: 4px;
+    --login-wave-min-width: 0px;
+    --login-wave-inline: 12px;
+  }
+}
+
+@media (max-height: 499px) and (orientation: landscape) {
+  :root {
+    --dock-h: 52px;
+    --dock-bottom-gap: 8px;
+    --mic-size: 64px;
+    --dock-action-size: 38px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --topbar-h: 70px;
+    --topbar-pad-block: 16px;
+    --topbar-pad-inline: 10px;
+    --topbar-gap: 8px;
+    --topbar-icon-size: 16px;
+    --tab-width: 160px;
+    --tab-h: 34px;
+    --tab-inner-pad: 2px;
+    --tab-pad-inline: 2px;
+    --tab-font-size: var(--text-15);
+  }
+}
+
+@media (max-width: 350px) {
+  :root { --tab-width: 150px; --popup-title-size: 22px; }
 }

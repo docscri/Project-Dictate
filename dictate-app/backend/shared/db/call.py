@@ -108,3 +108,21 @@ def update(
     raise ValueError(
         f"Unsupported database provider: {provider}"
     )
+
+
+def upsert(
+    table: str,
+    data: dict,
+    *,
+    on_conflict: str,
+):
+    if provider == "supabase":
+        return supabase.upsert(
+            table,
+            data,
+            on_conflict=on_conflict,
+        )
+
+    raise ValueError(
+        f"Unsupported database provider: {provider}"
+    )

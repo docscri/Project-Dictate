@@ -402,6 +402,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(response.json(), {"consultation_id": "c1", "status": "processing", "processing_stage": "finalizing_transcript"})
         row = self.database.rows["c1"]
         self.assertEqual((row["status"], row["processing_stage"], row["processing_error"]), ("saved", "completed", None))
+        self.assertEqual(row["last_processing_stage"], "saving_note")
         self.assertEqual(row["terms"], TERMS)
         self.assertEqual(row["note"], with_clinical_highlights(SOAP["sections"], TERMS))
         self.assertEqual(row["note"]["highlights"], [{"section": "subjective", "text": "Chest pain", "start": 0, "end": 10, "category": "medical_condition"}])
@@ -548,11 +549,22 @@ class IntegrationTests(unittest.TestCase):
         stream.connect = AsyncMock(side_effect=RuntimeError("private provider details"))
         with patch.object(service.ai, "open_transcription_stream", return_value=stream), TestClient(app) as client:
             with client.websocket_connect("/api/dictation/stream/c1?token=test-access-token") as websocket:
-                self.assertEqual(websocket.receive_json(), {"type": "error", "code": "connection_error", "message": "Audio connection lost. Please reconnect."})
+                self.assertEqual(websocket.receive_json(), {
+                    "type": "error",
+                    "code": "connection_error",
+                    "message": "Audio connection lost. Please reconnect.",
+                    "fields": [],
+                })
         self.assertTrue(stream.closed)
         self.assertFalse(service._active_streams)
 
     def test_each_processing_failure_saves_only_note_failed(self):
+        expected_last_stage = {
+            "empty": None,
+            "ner": "finalizing_transcript",
+            "llm": "structuring_note",
+            "save": "writing_note",
+        }
         for failure in ["empty", "ner", "llm", "save"]:
             with self.subTest(failure=failure):
                 self.database.rows["c1"].update(status="processing", transcript="" if failure == "empty" else "chest pain")
@@ -564,6 +576,80 @@ class IntegrationTests(unittest.TestCase):
                     self.assertIsNone(service.process_finished_dictation("d1", "c1"))
                 row = self.database.rows["c1"]
                 self.assertEqual((row["status"], row["processing_stage"], row["processing_error"]), ("failed", "failed", "note_failed"))
+                self.assertEqual(row["last_processing_stage"], expected_last_stage[failure])
+
+    def test_status_exposes_last_stage_and_retryability(self):
+        self.database.rows["c1"].update(
+            status="failed",
+            processing_stage="failed",
+            last_processing_stage="writing_note",
+            processing_error="note_failed",
+        )
+        with TestClient(app) as client:
+            response = client.get("/api/consultations/c1/status", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "status": "failed",
+            "processing_stage": "failed",
+            "processing_error": "note_failed",
+            "last_processing_stage": "writing_note",
+            "retryable": True,
+        })
+
+    def test_status_marks_nonfailed_processing_as_not_retryable(self):
+        self.database.rows["c1"].update(
+            status="processing",
+            processing_stage="writing_note",
+            last_processing_stage="structuring_note",
+            processing_error=None,
+            processing_started_at="2999-01-01T00:00:00+00:00",
+        )
+        with TestClient(app) as client:
+            response = client.get("/api/consultations/c1/status", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "status": "processing",
+            "processing_stage": "writing_note",
+            "processing_error": None,
+            "last_processing_stage": "structuring_note",
+            "retryable": False,
+        })
+
+    def test_status_recovers_stale_processing_for_existing_retry_flow(self):
+        self.database.rows["c1"].update(
+            status="processing",
+            transcript="Patient reports chest pain.",
+            processing_stage="writing_note",
+            last_processing_stage="structuring_note",
+            processing_error=None,
+            processing_started_at="2000-01-01T00:00:00+00:00",
+        )
+        with patch.dict(config["note"], {"processing_timeout_seconds": 900}), TestClient(app) as client:
+            response = client.get("/api/consultations/c1/status", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {
+            "status": "failed",
+            "processing_stage": "failed",
+            "processing_error": "note_failed",
+            "last_processing_stage": "structuring_note",
+            "retryable": True,
+        })
+        row = self.database.rows["c1"]
+        self.assertEqual(row["transcript"], "Patient reports chest pain.")
+        self.assertIsNone(row["processing_started_at"])
+
+    def test_malformed_processing_timestamp_does_not_fail_active_note(self):
+        self.database.rows["c1"].update(
+            status="processing",
+            processing_stage="writing_note",
+            processing_error=None,
+            processing_started_at="not-a-timestamp",
+        )
+        with TestClient(app) as client:
+            response = client.get("/api/consultations/c1/status", headers=self.headers)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "processing")
+        self.assertFalse(response.json()["retryable"])
 
 
 if __name__ == "__main__":

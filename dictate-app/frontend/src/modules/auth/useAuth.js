@@ -17,7 +17,7 @@ export default function useAuth() {
     const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email?.trim() ?? '') && values.password && (kind === 'login' || (values.name?.trim() && values.specialty));
     if (!valid) {
       setErrorCode('validation_error');
-      setInvalidFields([!values.name?.trim() && kind === 'signup' && 'name', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email?.trim() ?? '') && 'email', !values.password && 'password'].filter(Boolean));
+      setInvalidFields([!values.name?.trim() && kind === 'signup' && 'name', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email?.trim() ?? '') && 'email', !values.password && 'password', !values.specialty && kind === 'signup' && 'specialty'].filter(Boolean));
       return false;
     }
     setPending(true);

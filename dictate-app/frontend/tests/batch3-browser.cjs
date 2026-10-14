@@ -56,6 +56,7 @@ const os = require('node:os');
     console.log('PASS first page is bounded and an older remembered selection restores directly');
 
     failPage = true;
+    await button('Open consultations').click();
     await page.locator('.consultation-list').evaluate(node => { node.scrollTop = node.scrollHeight; });
     await page.locator('.consultation-list').getByRole('button', { name: 'Try again' }).waitFor();
     const failedCount = offsets.length; await page.waitForTimeout(500); assert.equal(offsets.length, failedCount);
@@ -69,6 +70,7 @@ const os = require('node:os');
     console.log('PASS page failure retains rows, stops retries; manual retry and keyboard load all 123 rows');
 
     failDetail = true; await page.locator('.consultation-row').first().click();
+    await button('Open consultations').click();
     await page.locator('.consultation-list').getByRole('button', { name: 'Try again' }).waitFor();
     failDetail = false; await page.locator('.consultation-list').getByRole('button', { name: 'Try again' }).click();
     await page.getByRole('heading', { name: 'Patient 0, 58', exact: true }).waitFor();
@@ -88,19 +90,24 @@ const os = require('node:os');
     }
     const focus = await live.evaluate(node => ({ width: getComputedStyle(node).outlineWidth, style: getComputedStyle(node).outlineStyle }));
     assert.equal(focus.width, '2px'); assert.notEqual(focus.style, 'none');
-    await button('New consultation').click();
-    const search = page.getByRole('tab', { name: 'Search existing patient' });
+    await button('Sources').focus();
+    await page.evaluate(async () => {
+      const source = performance.getEntriesByType('resource').find(item => item.name.includes('/src/shared/state/store.js')).name;
+      (await import(source)).setState({ patientPopupOpen: true });
+    });
+    const search = page.getByRole('tab', { name: 'Search', exact: true });
     await search.focus(); await search.press('ArrowRight');
-    await page.getByRole('textbox', { name: 'Full name', exact: true }).waitFor();
+    await page.getByRole('textbox', { name: 'Patient name', exact: true }).waitFor();
     await page.keyboard.press('Escape');
-    assert.equal(await button('New consultation').evaluate(node => document.activeElement === node), true);
+    assert.equal(await button('Sources').evaluate(node => document.activeElement === node), true);
     console.log('PASS keyboard tabs, linked panels, visible focus and popup Escape focus return');
 
-    await button('Profile').click(); await page.getByRole('textbox', { name: 'Full name' }).waitFor();
+    await button('Open consultations').click(); await button('Profile').click(); await page.getByRole('textbox', { name: 'Full name' }).waitFor();
     assert.equal(profileCalls, 1);
     await page.getByRole('textbox', { name: 'Full name' }).fill('Dr Updated');
-    await button('Save changes').click(); await page.waitForFunction(() => document.body.textContent.includes('Dr Updated'));
-    await page.getByRole('link', { name: 'Back', exact: true }).click();
+    await button('Save changes').click(); await page.getByText('Saved', { exact: true }).waitFor();
+    await page.getByRole('link', { name: 'Back to dictation', exact: true }).click();
+    await button('Open consultations').click();
     await page.locator('.dictation-profile').getByText('Dr Updated', { exact: true }).waitFor();
     assert.equal(profileCalls, 1);
     console.log('PASS profile fetch is shared and a saved profile updates the sidebar');

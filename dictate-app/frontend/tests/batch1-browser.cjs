@@ -85,26 +85,39 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
       await page.getByLabel('Password', { exact: true }).fill('fixture-password');
       await button(page, 'Sign in').click();
       await page.locator('.dictation-paper').waitFor();
+      await button(page, 'Open consultations').click();
+      await page.locator('.consultation-row').first().click();
+      await button(page, /Start dictation|Resume/).waitFor();
     };
     const seed = async () => {
       await first.goto('http://127.0.0.1:5174/login');
-      await first.evaluate(tokens => localStorage.setItem('dictate.backend.session', JSON.stringify({ ...tokens, user_id: tokens.user.id })), session('one'));
+      await first.evaluate(tokens => {
+        localStorage.setItem('dictate.backend.session', JSON.stringify({ ...tokens, user_id: tokens.user.id }));
+        localStorage.setItem('dictate.backend.selection.one', 'c-one');
+      }, session('one'));
       await first.goto('http://127.0.0.1:5174/dictation');
       await button(first, 'Start dictation').waitFor();
       await second.goto('http://127.0.0.1:5174/dictation');
       await button(second, 'Start dictation').waitFor();
     };
     await seed();
+    assert.equal(await button(first, 'New dictation').count(), 0);
     outage = true; await first.reload();
-    await first.getByText('Something went wrong. Please try again.', { exact: true }).waitFor();
+    await first.getByText('Something went wrong. Try again.', { exact: true }).waitFor();
     assert.ok(await first.evaluate(() => JSON.parse(localStorage.getItem('dictate.backend.session')).refresh_token));
     assert.equal(await first.getByText('PRIVATE PROVIDER DETAIL').count(), 0);
     outage = false; await button(first, 'Try again').click(); await button(first, 'Start dictation').waitFor();
     console.log('PASS startup outage: session retained, safe banner, manual retry recovers');
 
     await button(first, 'Start dictation').click(); await first.locator('.dictation-controls--listening').waitFor();
-    await button(second, 'Profile').click(); await button(second, 'Sign out').click();
+    await button(first, 'New dictation').waitFor();
+    await button(second, 'Open consultations').click();
+    await button(second, 'Profile').click();
+    hold = { path: '/api/auth/logout', method: 'POST', arrived: deferred(), release: deferred() };
+    await button(second, 'Sign out').click(); await hold.arrived.promise;
     await button(first, 'Sign in').waitFor();
+    await button(second, 'Sign in').waitFor();
+    hold.release.resolve(); hold = null;
     await first.waitForFunction(() => window.testTracks.length && window.testTracks.every(track => track.readyState === 'ended'));
     assert.deepEqual((await state(first)).dictationSessions, {});
     console.log('PASS cross-tab sign-out: Login, microphone stopped, transcript/account data cleared');
@@ -112,18 +125,25 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     await login(first, 'one'); await login(second, 'one');
     await button(first, 'Start dictation').click(); await first.locator('.dictation-controls--listening').waitFor();
     await login(second, 'two');
-    await first.getByRole('heading', { name: 'Patient two, 58', exact: true }).waitFor();
+    await first.waitForFunction(async () => {
+      const source = performance.getEntriesByType('resource').find(item => item.name.includes('/src/shared/state/store.js')).name;
+      return (await import(source)).getState().user?.id === 'two';
+    });
     await first.waitForFunction(() => window.testTracks.every(track => track.readyState === 'ended'));
     assert.equal((await state(first)).user.id, 'two');
+    assert.equal((await state(first)).selectedConsultation, null);
     assert.deepEqual((await state(first)).dictationSessions, {});
     console.log('PASS cross-tab account switch: new patient/profile, old recording stopped and data cleared');
 
     await login(first, 'one'); await login(second, 'one');
-    await button(first, 'New consultation').click();
-    await first.getByRole('tab', { name: 'Add new patient', exact: true }).click();
-    await first.getByLabel('Full name', { exact: true }).fill('Delayed patient');
+    await first.evaluate(async () => {
+      const source = performance.getEntriesByType('resource').find(item => item.name.includes('/src/shared/state/store.js')).name;
+      (await import(source)).setState({ patientPopupOpen: true });
+    });
+    await first.getByRole('tab', { name: 'Add patient', exact: true }).click();
+    await first.getByLabel('Patient name', { exact: true }).fill('Delayed patient');
     hold = { path: '/api/patients', method: 'POST', arrived: deferred(), release: deferred() };
-    await button(first, 'Add patient and start consultation').click(); await hold.arrived.promise;
+    await button(first, 'Add patient').click(); await hold.arrived.promise;
     await button(first, 'Close popup').click();
     const createsBefore = consultationCreates;
     hold.release.resolve(); hold = null;
@@ -135,11 +155,15 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     await button(first, 'Start dictation').click(); await first.locator('.dictation-controls--listening').waitFor();
     hold = { path: '/api/consultations/c-one/pause', method: 'POST', arrived: deferred(), release: deferred() };
     await button(first, 'Pause').click(); await hold.arrived.promise;
+    assert.equal((await state(first)).dictationSessions['c-one'].mode, 'paused');
     await login(second, 'two');
-    await first.getByRole('heading', { name: 'Patient two, 58', exact: true }).waitFor();
+    await first.waitForFunction(async () => {
+      const source = performance.getEntriesByType('resource').find(item => item.name.includes('/src/shared/state/store.js')).name;
+      return (await import(source)).getState().user?.id === 'two';
+    });
     hold.release.resolve(); hold = null; await first.waitForTimeout(250);
     const afterPause = await state(first);
-    assert.equal(afterPause.user.id, 'two'); assert.equal(afterPause.selectedConsultation.id, 'c-two');
+    assert.equal(afterPause.user.id, 'two'); assert.equal(afterPause.selectedConsultation, null);
     assert.deepEqual(afterPause.dictationSessions, {});
     console.log('PASS delayed pause: previous account response cannot populate the new account');
 
@@ -154,14 +178,17 @@ const deferred = () => { let resolve; const promise = new Promise(done => { reso
     hold = { path: '/api/consultations/c-one', method: 'DELETE', arrived: deferred(), release: deferred() };
     await button(first, 'Delete all').click(); await button(first, 'Delete').click(); await hold.arrived.promise;
     await login(second, 'two');
-    await first.getByRole('heading', { name: 'Patient two, 58', exact: true }).waitFor();
+    await first.waitForFunction(async () => {
+      const source = performance.getEntriesByType('resource').find(item => item.name.includes('/src/shared/state/store.js')).name;
+      return (await import(source)).getState().user?.id === 'two';
+    });
     hold.release.resolve(); hold = null; await first.waitForTimeout(250);
-    assert.equal((await state(first)).selectedConsultation.id, 'c-two');
+    assert.equal((await state(first)).selectedConsultation, null);
     assert.deepEqual((await state(first)).dictationSessions, {});
     console.log('PASS delayed deletion: new account selection and data remain intact');
 
     await login(first, 'one'); await login(second, 'one');
-    await button(first, 'Profile').click();
+    await button(first, 'Open consultations').click(); await button(first, 'Profile').click();
     await first.getByLabel('Full name', { exact: true }).fill('Previous account edit');
     hold = { path: '/api/profile', method: 'PUT', arrived: deferred(), release: deferred() };
     await button(first, 'Save changes').click(); await hold.arrived.promise;

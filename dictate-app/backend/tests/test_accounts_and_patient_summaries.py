@@ -181,6 +181,37 @@ class PatientSummaryTests(unittest.TestCase):
             self.assertEqual(consultations.list_consultations('d1'), [])
             patients.assert_not_called()
 
+    def test_sidebar_list_recovers_stale_processing_status(self):
+        stale = {
+            **self.rows[0],
+            'status': 'processing',
+            'processing_stage': 'writing_note',
+            'last_processing_stage': 'structuring_note',
+            'processing_error': None,
+            'processing_started_at': '2000-01-01T00:00:00+00:00',
+        }
+        failed = {
+            **stale,
+            'status': 'failed',
+            'processing_stage': 'failed',
+            'processing_error': 'note_failed',
+            'processing_started_at': None,
+        }
+        with patch.object(consultations.db, 'consultation_summaries', return_value=[stale]), patch.object(consultations.db, 'mutate_consultation', return_value=[failed]) as mutate, patch.object(consultations.db, 'patient_summaries', return_value=[self.patient]):
+            result = consultations.list_consultations('d1')
+        self.assertEqual(result[0]['status'], 'failed')
+        mutate.assert_called_once_with(
+            'c0',
+            'd1',
+            ['processing'],
+            {
+                'status': 'failed',
+                'processing_stage': 'failed',
+                'processing_error': 'note_failed',
+                'processing_started_at': None,
+            },
+        )
+
     def test_patient_query_filters_doctor_and_only_requested_ids(self):
         query = Mock()
         query.select.return_value = query.eq.return_value = query.in_.return_value = query

@@ -55,6 +55,17 @@ def update(table: str, column: str, value, data: dict) -> list[dict[str, Any]]:
 
     return cast(list[dict[str, Any]], response.data)
 
+
+def upsert(table: str, data: dict, *, on_conflict: str) -> list[dict[str, Any]]:
+    response = (
+        supabase
+        .table(table)
+        .upsert(data, on_conflict=on_conflict)
+        .execute()
+    )
+
+    return cast(list[dict[str, Any]], response.data)
+
 def search(
     table: str,
     column: str,
@@ -93,7 +104,7 @@ def mutate_consultation(consultation_id: str, doctor_id: str, statuses: list[str
 
 def consultation_summaries(doctor_id: str, limit: int = 50, offset: int = 0) -> list[dict[str, Any]]:
     response = (supabase.table("consultations")
-                .select("id,doctor_id,patient_id,status,created_at")
+                .select("id,doctor_id,patient_id,status,created_at,processing_started_at,processing_stage,processing_error,last_processing_stage")
                 .eq("doctor_id", doctor_id)
                 .order("created_at", desc=True).order("id", desc=True)
                 .range(offset, offset + limit - 1).execute())

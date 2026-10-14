@@ -79,7 +79,7 @@ export default function App() {
     <Banner tone="danger">{messageFor(startupError)}</Banner>
     <Button onClick={() => { startup = null; setAttempt(value => value + 1); }}>Try again</Button>
   </main>;
-  if (!sessionReady) return <main className="app-start" aria-busy="true" />;
+  if (!sessionReady) return <main className="app-start" aria-busy="true"><span className="app-start__brand">Dictate</span><span className="sr-only">Loading</span></main>;
   if (path === '/signup') return <CreateAccountScreen />;
   if (path === '/profile' && user) return <ProfileScreen />;
   if (path === '/dictation' && user) return <DictationPage />;

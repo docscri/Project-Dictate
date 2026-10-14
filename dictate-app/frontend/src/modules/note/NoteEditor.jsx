@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { ErrorIcon } from '../../components/AccountIcons.jsx';
 import { sections } from '../../shared/state/notes.js';
 import { highlightedParts } from '../../shared/note/highlights.js';
 
@@ -27,10 +28,13 @@ function Body({ section, text, terms, highlights, readOnly, invalid, onEdit }) {
     }} />;
 }
 export default function NoteEditor({ note, terms = [], readOnly = false, invalidSections = [], onEdit }) {
-  return <section className="note-editor" aria-label="SOAP note">{sections.map(section => <div className="note-section" key={section}>
-    <span className="note-badge" aria-hidden="true">{section[0].toUpperCase()}</span>
-    <div className="note-section__content"><h3 className="note-kicker">{section.toUpperCase()}</h3>
-      <Body section={section} text={note[section] ?? ''} terms={terms} highlights={note.highlights ?? []} readOnly={readOnly} invalid={invalidSections.includes(section)} onEdit={onEdit} />
-    </div>
-  </div>)}</section>;
+  return <section className="note-editor" aria-label="SOAP note">{sections.map(section => {
+    const invalid = invalidSections.includes(section);
+    return <div className="note-section" key={section}>
+      <span className="note-badge" aria-hidden="true">{section[0].toUpperCase()}</span>
+      <div className="note-section__content"><div className="note-kicker-row"><h3 className="note-kicker">{section.toUpperCase()}</h3>{invalid && <span className="note-section__error-icon" aria-hidden="true"><ErrorIcon /></span>}</div>
+        <Body section={section} text={note[section] ?? ''} terms={terms} highlights={note.highlights ?? []} readOnly={readOnly} invalid={invalid} onEdit={onEdit} />
+      </div>
+    </div>;
+  })}</section>;
 }

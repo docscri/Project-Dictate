@@ -36,7 +36,7 @@ class PaginationTests(unittest.TestCase):
         with patch.object(provider.supabase, 'table', return_value=query) as table:
             self.assertEqual(provider.consultation_summaries('doctor-one', 25, 100), [{'id': 'c1'}])
         table.assert_called_once_with('consultations')
-        query.select.assert_called_once_with('id,doctor_id,patient_id,status,created_at')
+        query.select.assert_called_once_with('id,doctor_id,patient_id,status,created_at,processing_started_at,processing_stage,processing_error,last_processing_stage')
         query.eq.assert_called_once_with('doctor_id', 'doctor-one')
         self.assertEqual(query.order.call_args_list[0].args, ('created_at',))
         self.assertEqual(query.order.call_args_list[1].args, ('id',))

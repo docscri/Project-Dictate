@@ -14,7 +14,7 @@ export default function useNoteStatus() {
   const retrying = useRef(false);
   useEffect(() => { if (id && !getState().noteSessions[id]) changeNote(id, noteSession(record)); }, [id, record]);
   useEffect(() => {
-    if (!id || record.status !== 'processing') return;
+    if (!id || record.status !== 'processing' || record.processing_pending) return;
     let active = true, timer;
     const owner = getState().user;
     const current = capture();
@@ -43,7 +43,7 @@ export default function useNoteStatus() {
     }
     poll();
     return () => { active = false; clearTimeout(timer); };
-  }, [id, record?.status, pollAttempt]);
+  }, [id, record?.status, record?.processing_pending, pollAttempt]);
   async function retry() {
     if (id && record.status === 'processing' && note.errorCode) { changeNote(id, { errorCode: null }); setPollAttempt(value => value + 1); return; }
     if (!id || record.status !== 'failed' || retrying.current) return;

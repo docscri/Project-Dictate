@@ -25,12 +25,17 @@ button {
   color: inherit;
 }
 
+time,
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
 :focus-visible,
 button:focus-visible,
 input:focus-visible,
 [role="tab"]:focus-visible,
 [role="dialog"]:focus-visible {
-  outline: var(--focus-width) solid var(--accent);
+  outline: var(--focus-width) solid var(--paper);
   outline-offset: var(--focus-offset);
 }
 
@@ -45,13 +50,19 @@ input:focus-visible,
 .app-start {
   display: grid;
   min-height: 100vh;
+  background: var(--ground);
+  color: var(--text);
   place-items: center;
 }
+
+.app-start__brand { font-size: var(--text-24); font-weight: var(--weight-bold); animation: app-start-pulse 2.8s var(--ease-out) infinite; }
+@keyframes app-start-pulse { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
 
 .app-start__title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: var(--text-44);
+  font-size: var(--text-32);
+  font-weight: var(--weight-bold);
 }
 
 .button {
@@ -101,7 +112,7 @@ input:focus-visible,
 
 .button--accent:hover:not(:disabled),
 .demo-force-hover .button--accent:not(:disabled) {
-  background: var(--done);
+  background: color-mix(in srgb, var(--accent) 86%, var(--ink));
 }
 
 .button--outline {
@@ -143,17 +154,18 @@ input:focus-visible,
 .input-field__control {
   width: 100%;
   min-height: var(--control-height-md);
-  border: var(--border-width) solid var(--line-strong);
+  border: var(--border-width) solid var(--ink);
   border-radius: var(--radius-14);
   padding: var(--field-pad-block) var(--field-pad-inline);
-  background: var(--control);
-  color: var(--text);
-  font-size: var(--text-15);
+  background: var(--field);
+  color: var(--ink);
+  font-size: var(--text-16);
+  font-weight: var(--weight-medium);
   transition: border-color var(--motion-fast) var(--ease-out), background-color var(--motion-fast) var(--ease-out);
 }
 
 .input-field__control::placeholder {
-  color: var(--muted);
+  color: var(--placeholder);
 }
 
 .input-field__control:hover:not(:disabled),
@@ -167,7 +179,11 @@ input:focus-visible,
 }
 
 .input-field__control--error {
-  border-color: var(--danger);
+  border: var(--focus-width) solid var(--danger);
+}
+
+.input-field__control[aria-invalid="true"] {
+  border: var(--focus-width) solid var(--rec);
 }
 
 .input-field__error {
@@ -196,7 +212,7 @@ input:focus-visible,
 }
 
 .paper-surface .input-field__control--error {
-  border-color: var(--error-ink);
+  border: var(--focus-width) solid var(--rec);
 }
 
 .paper-surface .input-field__error {
@@ -209,11 +225,11 @@ input:focus-visible,
   align-items: center;
   justify-content: center;
   gap: var(--chip-gap);
-  border: var(--border-width) solid var(--line-strong);
+  border: var(--border-width) solid var(--ink);
   border-radius: var(--radius-pill);
   padding-inline: var(--chip-pad-inline);
-  background: var(--transparent);
-  color: var(--muted);
+  background: var(--paper);
+  color: var(--ink);
   cursor: pointer;
   font-size: var(--text-14);
   font-weight: var(--weight-semibold);
@@ -222,14 +238,15 @@ input:focus-visible,
 
 .chip:hover:not(:disabled),
 .demo-force-hover .chip:not(:disabled) {
-  border-color: var(--muted);
-  color: var(--text);
+  border-color: var(--ink);
+  background: var(--hover-paper);
+  color: var(--ink);
 }
 
 .chip--selected {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .chip:disabled {
@@ -256,8 +273,8 @@ input:focus-visible,
   gap: var(--tabs-gap);
   border-radius: var(--radius-pill);
   padding: var(--tabs-pad);
-  background: var(--paper-chip);
-  color: var(--ink-muted);
+  background: var(--paper);
+  color: var(--ink);
 }
 
 .tabs__tab {
@@ -265,7 +282,7 @@ input:focus-visible,
   border: 0;
   border-radius: var(--radius-pill);
   padding-inline: var(--tabs-button-pad);
-  background: var(--transparent);
+  background: var(--paper);
   color: inherit;
   cursor: pointer;
   font-size: var(--text-14);
@@ -330,33 +347,61 @@ input:focus-visible,
 }
 
 .banner {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
+  display: grid;
+  grid-template-columns: var(--error-banner-icon-size) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--error-banner-gap);
+  width: 100%;
+  min-height: var(--error-banner-min-height);
   border: var(--border-width) solid var(--transparent);
   border-radius: var(--radius-14);
-  padding: var(--banner-pad);
-  font-size: var(--text-14);
+  padding: var(--error-banner-pad-block) var(--error-banner-pad-inline);
+  font-size: var(--error-banner-font-size);
+  font-weight: var(--weight-semibold);
+  line-height: var(--line-body);
 }
 
 .banner__icon {
-  flex: 0 0 auto;
-  font-size: var(--banner-icon-size);
+  display: grid;
+  width: var(--error-banner-icon-size);
+  height: var(--error-banner-icon-size);
+  place-items: center;
+  font-size: var(--error-banner-icon-size);
   line-height: var(--line-tight);
 }
+.banner__icon .account-icon,
+.banner__icon svg { width: 100%; height: 100%; }
+.banner > div { display: flex; min-width: 0; align-items: center; gap: var(--error-banner-gap); flex-wrap: wrap; }
+.banner > div { max-width: 100%; overflow-wrap: anywhere; }
+.banner > div > :first-child { min-width: 0; max-width: 100%; }
+.banner .button { min-height: 34px; flex: 0 0 auto; padding-inline: var(--space-3); font-size: var(--error-banner-font-size); }
 
 .banner--warn {
   border-color: var(--offline-line);
   background: var(--offline-bg);
   color: var(--offline-text);
 }
-.banner__icon svg { width: var(--banner-icon-size); height: var(--banner-icon-size); fill: none; stroke: var(--offline-icon); stroke-width: var(--account-stroke-width); stroke-linecap: round; stroke-linejoin: round; }
+.banner__icon svg { fill: none; stroke: currentColor; stroke-width: var(--account-stroke-width); stroke-linecap: round; stroke-linejoin: round; }
+.banner--warn .banner__icon { color: var(--offline-icon); }
 
 .banner--danger {
-  border-color: var(--error-ink);
-  background: var(--error-bg);
+  display: grid;
+  grid-template-columns: var(--error-banner-icon-size) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--error-banner-gap);
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  background: var(--transparent);
+  color: var(--rec);
+}
+
+.paper-surface .banner--danger {
+  background: var(--transparent);
   color: var(--error-ink);
 }
+
+.banner--danger .banner__icon { color: var(--rec); }
 
 .banner--info {
   border-color: var(--line-strong);
@@ -404,7 +449,8 @@ input:focus-visible,
 .modal__title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: var(--text-24);
+  font-size: var(--text-32);
+  font-weight: var(--weight-bold);
 }
 
 .status-label {
@@ -429,7 +475,7 @@ input:focus-visible,
 }
 
 .status-label--dictating {
-  background: var(--review-bg);
+  background: color-mix(in srgb, var(--rec) 10%, var(--ground));
   color: var(--rec);
 }
 
@@ -443,18 +489,25 @@ input:focus-visible,
 
 .status-label--ready {
   background: var(--panel);
-  color: var(--accent);
+  color: var(--paper);
 }
 
 .status-label--signed,
 .status-label--done {
   border-color: var(--signed-line);
   background: var(--panel);
-  color: var(--done);
+  color: var(--paper);
+}
+
+.paper-surface .status-label--signed,
+.paper-surface .status-label--done,
+.paper-surface .status-label--ready {
+  background: var(--paper);
+  color: var(--accent-ink);
 }
 
 .status-label--failed {
-  background: var(--review-bg);
+  background: color-mix(in srgb, var(--rec) 10%, var(--ground));
   color: var(--danger);
 }
 
@@ -471,7 +524,8 @@ input:focus-visible,
 .dev-page__title {
   margin: 0;
   font-family: var(--font-serif);
-  font-size: var(--text-44);
+  font-size: var(--text-32);
+  font-weight: var(--weight-bold);
 }
 
 .dev-page__section {
@@ -510,7 +564,7 @@ input:focus-visible,
 }
 
 .dev-page__item--focus {
-  outline: var(--focus-width) solid var(--accent);
+  outline: var(--focus-width) solid var(--paper);
   outline-offset: var(--focus-offset);
 }
 
@@ -541,7 +595,7 @@ input:focus-visible,
 .demo-force-focus .chip,
 .demo-force-focus .input-field__control,
 .demo-force-focus .tabs__tab {
-  outline: var(--focus-width) solid var(--accent);
+  outline: var(--focus-width) solid var(--paper);
   outline-offset: var(--focus-offset);
 }
 .tabs__tab:focus-visible { outline-color: var(--accent-ink); }
@@ -561,7 +615,7 @@ input:focus-visible,
   }
 
   .dev-page__title {
-    font-size: var(--text-34);
+    font-size: var(--text-32);
   }
 
   .dev-page__section {

@@ -1,3 +1,5 @@
 export function PlusIcon() { return <svg className="consultation-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>; }
 export function SearchIcon() { return <svg className="consultation-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7" /><path d="m16 16 5 5" /></svg>; }
 export function CloseIcon() { return <svg className="consultation-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>; }
+export function MenuIcon() { return <svg className="consultation-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>; }
+export function QuoteIcon() { return <svg className="consultation-icon" viewBox="3 3 19 14" aria-hidden="true"><path d="M8.5 11H5.75A1.75 1.75 0 0 1 4 9.25v-3.5A1.75 1.75 0 0 1 5.75 4h3.5A1.75 1.75 0 0 1 11 5.75v5.5A4.75 4.75 0 0 1 6.25 16M18.5 11h-2.75A1.75 1.75 0 0 1 14 9.25v-3.5A1.75 1.75 0 0 1 15.75 4h3.5A1.75 1.75 0 0 1 21 5.75v5.5A4.75 4.75 0 0 1 16.25 16" /></svg>; }

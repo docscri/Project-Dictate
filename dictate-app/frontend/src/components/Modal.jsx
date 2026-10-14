@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import Button from './Button.jsx';
 
-export default function Modal({ open, onClose = () => {}, title = 'Dialog', header = true, className = '', children }) {
+export default function Modal({ open, onClose = () => {}, title = 'Dialog', header = true, className = '', backdropClassName = '', children }) {
   const dialog = useRef(null);
   useEffect(() => {
     if (!open) return undefined;
@@ -32,7 +32,7 @@ export default function Modal({ open, onClose = () => {}, title = 'Dialog', head
   if (!open) return null;
 
   return (
-    <div className="modal-backdrop">
+    <div className={['modal-backdrop', backdropClassName].filter(Boolean).join(' ')}>
       <button type="button" className="modal-dismiss" aria-label="Close" tabIndex={-1} onClick={onClose} />
       <section ref={dialog} className={['modal', className].filter(Boolean).join(' ')} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
         {header && <header className="modal__header">

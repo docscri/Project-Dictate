@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from modules.note_formatter.service import (
     load_note_format,
 )
+from shared.errors import api_error
 
 
 router = APIRouter(
@@ -26,7 +27,4 @@ def get_note_format(name: str):
         return load_note_format(name)
 
     except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="Note format not found",
-        )
+        raise api_error(404, "not_found", "Note format not found.")

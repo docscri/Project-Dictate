@@ -8,6 +8,7 @@ from fastapi import WebSocketException
 from fastapi.testclient import TestClient
 from supabase_auth.errors import AuthApiError, AuthRetryableError, AuthUnknownError
 
+import main
 from main import app
 from modules.auth import service as accounts
 from modules.note_formatter.service import load_note_format, load_note_instructions
@@ -17,6 +18,28 @@ from shared.security import get_websocket_user
 
 
 class Batch1SecurityTests(unittest.TestCase):
+    def assert_error(self, response, status, code, fields=None):
+        self.assertEqual(response.status_code, status, response.text)
+        self.assertEqual(set(response.json()), {'code', 'message', 'fields'})
+        self.assertEqual(response.json()['code'], code)
+        self.assertEqual(response.json()['fields'], fields or [])
+
+    def test_error_contract_for_authentication_validation_and_missing_routes(self):
+        with TestClient(app) as client:
+            self.assert_error(client.get('/api/profile'), 401, 'unauthorized')
+            self.assert_error(
+                client.post('/api/auth/login', json={'email': 'invalid', 'password': 'test'}),
+                422,
+                'validation_error',
+                ['email'],
+            )
+            self.assert_error(client.get('/api/does-not-exist'), 404, 'not_found')
+
+    def test_lifespan_logs_startup(self):
+        with patch.object(main.logger, 'info') as info, TestClient(app):
+            pass
+        info.assert_called_once_with('Dictate backend started')
+
     def test_only_named_note_files_are_accessible(self):
         self.assertTrue(load_note_format())
         self.assertTrue(load_note_instructions())
@@ -45,6 +68,8 @@ class Batch1SecurityTests(unittest.TestCase):
                     response = client.request(method, path, json=body, headers={'Authorization': 'Bearer test-token'})
                     self.assertEqual(response.status_code, 500)
                     self.assertEqual(response.json()['code'], 'server_error')
+                    self.assertEqual(set(response.json()), {'code', 'message', 'fields'})
+                    self.assertEqual(response.json()['fields'], [])
                     self.assertNotIn('private provider detail', response.text)
 
     def test_logout_provider_outage(self):
@@ -59,6 +84,7 @@ class Batch1SecurityTests(unittest.TestCase):
             response = TestClient(app).post('/api/auth/login', json={'email': 'doctor@example.com', 'password': 'wrong'})
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.json()['code'], 'invalid_credentials')
+        self.assertEqual(response.json()['fields'], [])
 
     def test_auth_error_classification(self):
         self.assertTrue(service_unavailable(AuthApiError('unavailable', 503, None)))

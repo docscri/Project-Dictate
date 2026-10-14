@@ -1,41 +1,36 @@
-﻿import Button from '../../components/Button.jsx';
 import Input from '../../components/Input.jsx';
 import Banner from '../../components/Banner.jsx';
-import DepartmentChips from '../../components/DepartmentChips.jsx';
+import DepartmentSelect from '../../components/DepartmentSelect.jsx';
 import SoapSections from '../../components/SoapSections.jsx';
-import { useStore } from '../../shared/state/store.js';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '../../components/AccountIcons.jsx';
 import { messageFor } from '../../shared/errors.js';
 import { navigate } from '../../shared/navigation.js';
 import useProfile from './useProfile.js';
 
 export default function ProfileScreen() {
-  const { user } = useStore();
-  const { profile, name, setName, specialty, setSpecialty, pending, errorCode, invalidFields, save, signOut } = useProfile();
+  const { profile, name, setName, email, setEmail, specialty, setSpecialty, pending, errorCode, invalidFields, saved, save, signOut } = useProfile();
   const initials = (profile?.name ?? '').replace(/^Dr\.?\s*/i, '').split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+  const isInvalid = (field) => errorCode === 'validation_error' && invalidFields.includes(field);
+
   return (
     <main className="profile-screen" aria-busy={pending}>
-      <aside className="profile-sidebar">
-        <div className="account-brand">Dictate</div>
-        <div className="profile-identity"><div className="profile-avatar" aria-hidden="true">{initials}</div><h2>{profile?.name}</h2><p>{profile?.specialty}</p></div>
-        <div className="profile-sidebar-actions">
-          <a className="profile-back" href="/dictation" onClick={(event) => { event.preventDefault(); navigate('/dictation'); }}>Back</a>
-          <button className="profile-signout" type="button" disabled={pending} onClick={signOut}>Sign out</button>
-        </div>
-      </aside>
       <section className="profile-panel paper-surface">
-        <h1 className="account-heading">Profile</h1>
-        {errorCode && <Banner className="account-banner" tone="danger">{messageFor(errorCode)}</Banner>}
-        <form noValidate onSubmit={(event) => { event.preventDefault(); save(); }}>
-          <div className="profile-fields-row">
-            <Input label="Full name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} disabled={pending} invalid={errorCode === 'validation_error' && invalidFields.includes('name')} />
-            <Input label="Email" type="email" value={user?.email ?? ''} readOnly />
-          </div>
-          <div className="account-form-section"><p className="account-label">Department</p><DepartmentChips value={specialty} onChange={setSpecialty} disabled={pending} invalid={errorCode === 'validation_error' && invalidFields.includes('specialty')} /></div>
-          <div className="account-form-section"><p className="account-label">Your note sections</p><SoapSections /></div>
-          <Button className="profile-save" size="lg" type="submit" disabled={pending}>Save changes</Button>
-        </form>
+        <a className="profile-back" href="/dictation" aria-label="Back to dictation" onClick={(event) => { event.preventDefault(); navigate('/dictation'); }}><ArrowLeftIcon /></a>
+        <h1 className="account-visually-hidden">Profile</h1>
+        <div className="profile-form-stage">
+          {errorCode && <Banner className="account-banner" tone="danger">{messageFor(errorCode)}</Banner>}
+          {!profile ? <div className="profile-form-skeleton" aria-label="Loading profile details"><span className="profile-form-skeleton__avatar" /><span /><span /><span /><span className="profile-form-skeleton__action" /></div> : <form className="account-compact-form profile-compact-form" noValidate onSubmit={(event) => { event.preventDefault(); save(); }}>
+            <div className="profile-avatar" aria-hidden="true">{initials}</div>
+            <Input label="Full name" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} disabled={pending} invalid={isInvalid('name')} showInvalidIcon />
+            <Input label="Email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={pending} invalid={isInvalid('email')} showInvalidIcon />
+            <DepartmentSelect value={specialty} onChange={setSpecialty} disabled={pending} invalid={isInvalid('specialty')} />
+            <button className={`profile-save${saved ? ' profile-save--saved' : ''}`} type="submit" aria-label="Save changes" disabled={pending}><span className="account-action-circle">{saved ? <CheckIcon /> : <ArrowRightIcon />}</span></button>
+            {saved && <span className="profile-saved-status" role="status">Saved</span>}
+          </form>}
+        </div>
+        <button className="profile-signout profile-signout-bottom" type="button" disabled={pending} onClick={signOut}>Sign out</button>
       </section>
+      <aside className="profile-preview-panel"><div className="profile-preview-content"><div className="soap-preview paper-surface"><h2 className="soap-preview-heading">{specialty}</h2><SoapSections preview /></div></div></aside>
     </main>
   );
 }
-

@@ -16,6 +16,7 @@ database:
 
 note:
   default_format: "default"
+  processing_timeout_seconds: 900
 
 ai:
   transcription: "deepgram"

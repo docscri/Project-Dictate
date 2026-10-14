@@ -1,12 +1,60 @@
 # modules/consultations/service.py
 
+from datetime import datetime, timedelta, timezone
+
 from shared.db import call as db
+from shared.config import config
 from modules.note_formatter.highlights import with_clinical_highlights
 from shared.logger import get_logger
 from shared.errors import api_error
 
 
 logger = get_logger(__name__)
+
+
+def _processing_started_at(value) -> datetime | None:
+    if isinstance(value, datetime):
+        started_at = value
+    elif isinstance(value, str):
+        try:
+            started_at = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    else:
+        return None
+    return started_at.replace(tzinfo=timezone.utc) if started_at.tzinfo is None else started_at.astimezone(timezone.utc)
+
+
+def recover_stale_processing(user_id: str, consultation: dict) -> dict:
+    if consultation.get("status") != "processing":
+        return consultation
+
+    timeout = config.get("note", {}).get("processing_timeout_seconds", 900)
+    if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+        logger.error("Invalid note.processing_timeout_seconds; using 900 seconds")
+        timeout = 900
+
+    started_at = _processing_started_at(consultation.get("processing_started_at"))
+    if started_at is None or started_at > datetime.now(timezone.utc) - timedelta(seconds=timeout):
+        return consultation
+
+    recovered = db.mutate_consultation(
+        consultation["id"],
+        user_id,
+        ["processing"],
+        {
+            "status": "failed",
+            "processing_stage": "failed",
+            "processing_error": "note_failed",
+            "processing_started_at": None,
+        },
+    )
+    if recovered:
+        logger.warning("Recovered stale note processing for consultation %s", consultation["id"])
+        return recovered[0]
+
+    latest = db.select("consultations", "id", consultation["id"])
+    return latest[0] if latest and latest[0].get("doctor_id") == user_id else consultation
 
 
 def create_consultation(
@@ -97,7 +145,10 @@ def list_consultations(
         f"Listing consultations for doctor {user_id}"
     )
 
-    consultations = db.consultation_summaries(user_id, limit, offset)
+    consultations = [
+        recover_stale_processing(user_id, consultation)
+        for consultation in db.consultation_summaries(user_id, limit, offset)
+    ]
 
     logger.info(
         f"Found {len(consultations)} consultations"
@@ -131,12 +182,19 @@ def get_consultation_status(
     if consultation is None:
         return None
 
+    consultation = recover_stale_processing(user_id, consultation)
+
     return {
         "status": consultation["status"],
         "processing_stage": consultation.get(
             "processing_stage"
         ),
         "processing_error": consultation.get("processing_error"),
+        "last_processing_stage": consultation.get("last_processing_stage"),
+        "retryable": (
+            consultation.get("status") == "failed"
+            and consultation.get("processing_error") == "note_failed"
+        ),
     }
 
 
@@ -184,4 +242,9 @@ def change_consultation(user_id: str, consultation_id: str, statuses: list[str],
 
 
 def sign_consultation(user_id: str, consultation_id: str):
-    return change_consultation(user_id, consultation_id, ["saved"], {"status": "signed"})
+    return change_consultation(
+        user_id,
+        consultation_id,
+        ["saved"],
+        {"status": "signed", "signed_at": datetime.now(timezone.utc).isoformat()},
+    )

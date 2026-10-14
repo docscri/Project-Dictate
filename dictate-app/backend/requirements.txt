@@ -1,5 +1,5 @@
 # Direct dependencies, pinned to the verified backend environment.
--c constraints.txt
+-c setup/constraints.txt
 
 fastapi==0.142.2
 anyio==4.15.1

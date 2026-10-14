@@ -6,6 +6,7 @@ import './styles/base.css';
 import './styles/account.css';
 import './styles/dictation.css';
 import './styles/note.css';
+import './styles/scrollbars.css';
 
 const page = import.meta.env.DEV && window.location.pathname === '/dev/components'
   ? React.createElement((await import('./pages/DevComponents.jsx')).default)

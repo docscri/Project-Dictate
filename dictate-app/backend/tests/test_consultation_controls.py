@@ -16,6 +16,12 @@ from tests import test_dictation_pipeline as b6
 class ConsultationControlTests(unittest.TestCase):
     setUp = b6.IntegrationTests.setUp
 
+    def assert_error(self, response, status, code):
+        self.assertEqual(response.status_code, status, response.text)
+        self.assertEqual(set(response.json()), {"code", "message", "fields"})
+        self.assertEqual(response.json()["code"], code)
+        self.assertEqual(response.json()["fields"], [])
+
     def test_pause_flushes_and_resume_appends_same_consultation(self):
         first, second = b6.FakeTranscriptionStream(), b6.FakeTranscriptionStream()
         with patch.object(service.ai, "open_transcription_stream", side_effect=[first, second]), TestClient(app) as client:
@@ -102,8 +108,14 @@ class ConsultationControlTests(unittest.TestCase):
         with TestClient(app) as client:
             for method, suffix in [("post", "/pause"), ("post", "/sign"), ("delete", "")]:
                 response = client.request(method, "/api/consultations/c1" + suffix, headers=self.headers)
-                self.assertEqual((response.status_code, response.json()["code"]), (404, "not_found"))
+                self.assert_error(response, 404, "not_found")
         self.assertFalse(self.database.updates)
+
+    def test_locked_consultation_uses_standard_error_contract(self):
+        self.database.rows["c1"]["status"] = "signed"
+        with TestClient(app) as client:
+            response = client.post("/api/consultations/c1/pause", headers=self.headers)
+        self.assert_error(response, 409, "locked")
 
     def test_concurrent_finish_claims_one_job(self):
         self.database.rows["c1"]["status"] = "paused"

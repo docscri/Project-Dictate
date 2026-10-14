@@ -1,6 +1,6 @@
 # modules/consultations/routes.py
 
-from fastapi import APIRouter, Depends, HTTPException, Response, Query
+from fastapi import APIRouter, Depends, Response, Query
 
 from modules.consultations.schemas import (
     ConsultationCreateRequest,
@@ -17,6 +17,7 @@ from modules.consultations.service import (
 )
 from modules.dictation.service import pause_dictation, delete_consultation
 from shared.security import get_current_user
+from shared.errors import api_error
 
 
 router = APIRouter(
@@ -52,10 +53,7 @@ def create_consultation_route(
     )
 
     if consultation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found",
-        )
+        raise api_error(404, "not_found", "Patient not found.")
 
     return consultation
 
@@ -71,10 +69,7 @@ def get_consultation_route(
     )
 
     if consultation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Consultation not found",
-        )
+        raise api_error(404, "not_found", "Consultation not found.")
 
     return consultation
 
@@ -89,10 +84,7 @@ def get_consultation_status_route(
     )
 
     if status is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Consultation not found",
-        )
+        raise api_error(404, "not_found", "Consultation not found.")
 
     return status
 
@@ -117,9 +109,6 @@ def update_consultation_note_route(
     )
 
     if consultation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Consultation not found",
-        )
+        raise api_error(404, "not_found", "Consultation not found.")
 
     return consultation

@@ -43,3 +43,8 @@ def logout(access_token: str):
 def delete_user(user_id: str):
     with _client(admin=True) as client:
         client.auth.admin.delete_user(user_id)
+
+
+def update_user_email(user_id: str, email: str):
+    with _client(admin=True) as client:
+        return client.auth.admin.update_user_by_id(user_id, {'email': email})

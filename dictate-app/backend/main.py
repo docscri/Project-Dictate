@@ -1,4 +1,5 @@
 from pathlib import Path
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -22,8 +23,15 @@ from shared.errors import install_error_handlers
 logger = get_logger(__name__)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Dictate backend started")
+    yield
+
+
 app = FastAPI(
     title=config["app"]["name"],
+    lifespan=lifespan,
 )
 install_error_handlers(app)
 app.add_middleware(
@@ -49,8 +57,3 @@ def health_check():
         "service": config["app"]["name"],
         "environment": config["app"]["environment"],
     }
-
-
-@app.on_event("startup")
-def startup_event():
-    logger.info("Dictate backend started")

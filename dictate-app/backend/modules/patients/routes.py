@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from modules.patients.schemas import PatientCreateRequest
 from modules.patients.service import (
@@ -7,6 +7,7 @@ from modules.patients.service import (
     search_patients,
 )
 from shared.security import get_current_user
+from shared.errors import api_error
 
 
 router = APIRouter(
@@ -48,9 +49,6 @@ def get_patient_route(
     )
 
     if patient is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Patient not found",
-        )
+        raise api_error(404, "not_found", "Patient not found.")
 
     return patient

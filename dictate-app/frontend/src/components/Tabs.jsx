@@ -23,6 +23,7 @@ export default function Tabs({ items, active, onChange, className = '', id, labe
             className="tabs__tab"
             type="button"
             role="tab"
+            aria-label={label}
             aria-selected={selected}
             aria-controls={`${prefix}-${encodeURIComponent(value)}-panel`}
             disabled={disabled}
@@ -34,7 +35,7 @@ export default function Tabs({ items, active, onChange, className = '', id, labe
               event.preventDefault(); buttons.current.get(next)?.focus(); onChange?.(next);
             }}
           >
-            {label}
+            {typeof item === 'object' && item.shortLabel ? <><span className="tab-label-full">{label}</span><span className="tab-label-short" aria-hidden="true">{item.shortLabel}</span></> : label}
           </button>
         );
       })}

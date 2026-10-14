@@ -18,10 +18,7 @@ def get_current_user(
         response = auth.get_user(token)
 
         if response is None or response.user is None:
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid token",
-            )
+            raise api_error(401, "session_expired", "Please sign in again.")
 
         user = response.user
 
@@ -33,10 +30,7 @@ def get_current_user(
     except Exception as error:
         if service_unavailable(error):
             raise api_error(500, "server_error", "Something went wrong. Please try again.") from None
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid or expired token",
-        )
+        raise api_error(401, "session_expired", "Please sign in again.")
 
 
 def get_websocket_user(

@@ -25,6 +25,12 @@ def delete_user(user_id: str):
     raise ValueError(f"Unsupported auth provider: {provider}")
 
 
+def update_user_email(user_id: str, email: str):
+    if provider == "supabase":
+        return supabase.update_user_email(user_id, email)
+    raise ValueError(f"Unsupported auth provider: {provider}")
+
+
 def signup(
     email: str,
     password: str,

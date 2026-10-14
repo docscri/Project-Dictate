@@ -3,6 +3,7 @@
 import asyncio
 from contextlib import suppress
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 
 from anyio import CancelScope
 from fastapi import WebSocket, WebSocketDisconnect
@@ -140,7 +141,12 @@ async def handle_dictation_stream(
         elif consultation.get("status") not in ("ready", "paused", "dictating"):
             code = "invalid_state"
         if code:
-            await websocket.send_json({"type": "error", "code": code, "message": "Dictation cannot start."})
+            await websocket.send_json({
+                "type": "error",
+                "code": code,
+                "message": "Dictation cannot start.",
+                "fields": [],
+            })
             await websocket.close(code=1008)
             return
 
@@ -180,7 +186,12 @@ async def handle_dictation_stream(
         logger.exception("Dictation stream failed for consultation %s", consultation_id)
         if websocket.application_state == WebSocketState.CONNECTED:
             with suppress(WebSocketDisconnect, RuntimeError, OSError):
-                await websocket.send_json({"type": "error", "code": "connection_error", "message": "Audio connection lost. Please reconnect."})
+                await websocket.send_json({
+                    "type": "error",
+                    "code": "connection_error",
+                    "message": "Audio connection lost. Please reconnect.",
+                    "fields": [],
+                })
     finally:
         if session is not None:
             await _cleanup_session(session, consultation_id, user_id)
@@ -228,26 +239,14 @@ def finish_dictation(
     user_id: str,
     consultation_id: str,
 ):
-    consultations = db.select(
-        "consultations",
-        "id",
-        consultation_id,
-    )
-
-    if not consultations:
-        return None
-
-    consultation = consultations[0]
-
-    if consultation["doctor_id"] != user_id:
-        return None
-
     result = change_consultation(
         user_id, consultation_id, ["dictating", "paused", "failed"],
         {
             "status": "processing",
             "processing_stage": "finalizing_transcript",
+            "last_processing_stage": None,
             "processing_error": None,
+            "processing_started_at": datetime.now(timezone.utc).isoformat(),
         },
     )
 
@@ -264,11 +263,13 @@ def finish_dictation(
 def update_processing_stage(
     consultation_id: str,
     stage: str,
+    last_processing_stage: str | None,
 ):
     write_processing(
         consultation_id,
         {
             "processing_stage": stage,
+            "last_processing_stage": last_processing_stage,
         },
     )
 
@@ -282,6 +283,7 @@ def process_finished_dictation(
     consultation_id: str,
 ):
     owned = False
+    last_processing_stage = None
     try:
         consultations = db.select(
             "consultations",
@@ -314,25 +316,35 @@ def process_finished_dictation(
         if not transcript.strip():
             raise ValueError("Transcript is empty")
 
+        last_processing_stage = "finalizing_transcript"
+
         extraction_enabled = config.get("ai", {}).get("ner_enabled", True)
         if not isinstance(extraction_enabled, bool):
             raise ValueError("ai.ner_enabled must be true or false")
         terms = []
         if extraction_enabled:
-            update_processing_stage(consultation_id, "extracting_terms")
+            update_processing_stage(
+                consultation_id,
+                "extracting_terms",
+                last_processing_stage,
+            )
             terms = ai.call("tag_terms", {"text": transcript})["terms"]
+            last_processing_stage = "extracting_terms"
 
         update_processing_stage(
             consultation_id,
             "structuring_note",
+            last_processing_stage,
         )
 
         note_format = load_note_format("default")
         instructions = load_note_instructions("default")
+        last_processing_stage = "structuring_note"
 
         update_processing_stage(
             consultation_id,
             "writing_note",
+            last_processing_stage,
         )
 
         note_result = ai.call(
@@ -344,12 +356,14 @@ def process_finished_dictation(
                 "instructions": instructions,
             },
         )
+        last_processing_stage = "writing_note"
 
         note = with_clinical_highlights(note_result["sections"], terms)
 
         update_processing_stage(
             consultation_id,
             "saving_note",
+            last_processing_stage,
         )
 
         return complete_processing(
@@ -364,7 +378,13 @@ def process_finished_dictation(
             try:
                 write_processing(
                     consultation_id,
-                    {"status": "failed", "processing_stage": "failed", "processing_error": "note_failed"},
+                    {
+                        "status": "failed",
+                        "processing_stage": "failed",
+                        "last_processing_stage": last_processing_stage,
+                        "processing_error": "note_failed",
+                        "processing_started_at": None,
+                    },
                 )
             except Exception:
                 logger.exception("Could not save processing failure for consultation %s", consultation_id)
@@ -383,7 +403,9 @@ def complete_processing(
             "note": note,
             "status": "saved",
             "processing_stage": "completed",
+            "last_processing_stage": "saving_note",
             "processing_error": None,
+            "processing_started_at": None,
         },
     )
 

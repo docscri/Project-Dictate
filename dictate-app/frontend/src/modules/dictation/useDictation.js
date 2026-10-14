@@ -89,6 +89,7 @@ export default function useDictation() {
     const ownerCurrent = captureSessionGuard();
     const current = () => ownerCurrent() && version === generation.current && getState().selectedConsultation?.id === id;
     const prior = currentSession();
+    update(id, { mode: states.connecting, errorCode: null, hasStarted: true });
     let capture;
     try {
       // Calling capture before an await preserves Safari's button activation.
@@ -111,7 +112,13 @@ export default function useDictation() {
       if (runtime.current?.id === id) runtime.current.transport = transport;
       else transport.close();
       await transport.ready;
-    } catch (error) { await capture?.stop(); if (!current()) return; await release(); throw error; }
+    } catch (error) {
+      await capture?.stop();
+      if (!current()) return;
+      await release();
+      update(id, { mode: reset ? states.ready : states.paused, startedAt: null });
+      throw error;
+    }
   }
   const start = () => run(() => begin(true)), resume = () => run(() => begin(false)), retry = () => run(() => begin(false));
   const allowMicrophone = () => run(async current => { if (!useMock) await requestMicrophoneAccess(); if (current()) update(id, { mode: states.ready, errorCode: null }); });
@@ -119,12 +126,13 @@ export default function useDictation() {
     const active = runtime.current;
     await active?.capture?.stop({ flush: true });
     if (!current()) return;
+    update(id, snapshot => ({ mode: states.paused, elapsed: elapsedAt(snapshot), startedAt: null }), { status: 'paused' });
     try {
       const consultation = await pauseConsultation(id);
       if (!current()) return;
       await release(false, active);
       if (!current()) return;
-      update(id, snapshot => ({ mode: states.paused, elapsed: elapsedAt(snapshot), startedAt: null }), consultation);
+      update(id, { mode: states.paused, startedAt: null }, consultation);
     } catch (error) {
       if (!current()) return;
       await release(false, active);
@@ -135,7 +143,12 @@ export default function useDictation() {
   });
   const stop = () => run(async current => {
     const active = runtime.current;
+    const previousStatus = selectedConsultation.status;
+    const previousStage = selectedConsultation.processing_stage;
     if (runtime.current) runtime.current.finishing = true;
+    changeNote(id, { activeTab: 'note', lastStage: 'finalizing_transcript', errorCode: null });
+    update(id, snapshot => ({ mode: states.finishing, elapsed: elapsedAt(snapshot), startedAt: null, interimText: '', errorCode: null }),
+      { status: 'processing', processing_stage: 'finalizing_transcript', processing_pending: true });
     try {
       await active?.capture?.stop({ flush: true });
       if (!current()) return;
@@ -143,7 +156,10 @@ export default function useDictation() {
       const result = await finishDictation({ consultation_id: id });
       if (!current()) return;
       changeNote(id, { activeTab: 'note', lastStage: result.processing_stage ?? 'finalizing_transcript', errorCode: null });
-      update(id, snapshot => ({ mode: states.paused, elapsed: elapsedAt(snapshot), startedAt: null, interimText: '', errorCode: null }), result);
+      update(id, { mode: states.paused, startedAt: null, interimText: '', errorCode: null }, { ...result, processing_pending: false });
+    } catch (error) {
+      if (current()) update(id, { mode: states.paused, startedAt: null }, { status: previousStatus, processing_stage: previousStage, processing_pending: false });
+      throw error;
     } finally {
       if (current()) ++generation.current;
       await release(false, active);
@@ -175,7 +191,7 @@ export default function useDictation() {
     return () => window.removeEventListener('keydown', spaceControl);
   });
   return { mode, underlying, timer, pending, errorCode: session.errorCode, session, deleteDisabled,
-    startDisabled: !selectedPatient || !['ready', 'paused'].includes(selectedConsultation?.status),
+    startDisabled: Boolean(selectedConsultation && (!selectedPatient || !['ready', 'paused'].includes(selectedConsultation.status))),
     pauseDisabled: underlying !== states.listening, resumeDisabled: underlying !== states.paused || !['paused', 'dictating'].includes(selectedConsultation?.status),
     stopDisabled: ![states.listening, states.paused, states.reconnecting].includes(underlying),
     status: ['signed', 'processing', 'saved', 'failed'].includes(selectedConsultation?.status) ? selectedConsultation.status : underlying === states.listening ? 'dictating' : underlying,

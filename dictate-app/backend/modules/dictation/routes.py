@@ -2,7 +2,6 @@ from fastapi import (
     APIRouter,
     BackgroundTasks,
     Depends,
-    HTTPException,
     WebSocket,
     WebSocketDisconnect,
 )
@@ -17,6 +16,7 @@ from shared.security import (
     get_current_user,
     get_websocket_user,
 )
+from shared.errors import api_error
 
 
 router = APIRouter(
@@ -57,10 +57,7 @@ def finish_dictation_route(
     )
 
     if consultation is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Consultation not found",
-        )
+        raise api_error(404, "not_found", "Consultation not found.")
 
     background_tasks.add_task(
         process_finished_dictation,
